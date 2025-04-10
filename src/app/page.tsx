@@ -1,11 +1,10 @@
 import LandingLayout from './public/layouts/LandingLayout';
+import Hero from './public/sections/Hero';
 
 export default function Home() {
   return (
     <LandingLayout>
-      <div className="container mx-auto px-4">
-        {/* Your landing page content will go here */}
-      </div>
+      <Hero />
     </LandingLayout>
   );
 }

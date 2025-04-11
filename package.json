@@ -6,10 +6,12 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@types/three": "^0.175.0",
+    "framer-motion": "^12.6.3",
     "globe.gl": "^2.41.4",
     "next": "15.2.5",
     "react": "^19.0.0",

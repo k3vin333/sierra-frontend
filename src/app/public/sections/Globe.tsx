@@ -66,6 +66,7 @@ const GlobeComponent = () => {
       transition={{ 
         duration: 1.2,
         ease: [0.76, 0, 0.24, 1],
+        delay: 1.5
       }}
     >
       <div 

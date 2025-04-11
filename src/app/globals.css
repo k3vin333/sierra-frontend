@@ -25,13 +25,45 @@ body {
   font-family: 'Montserrat', sans-serif;
 }
 
-@keyframes zoomOut {
+/* Animation timing functions */
+.ease-in-out {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom smooth easing function for horizontal slide */
+.ease-smooth-slide {
+  transition-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* Extra fluid motion */
+.ease-fluid {
+  transition-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+@keyframes zoomOutNoFade {
   0% {
     transform: scale(3);
-    opacity: 0.8;
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
   }
   100% {
     transform: scale(1);
-    opacity: 0.5;
+    opacity: 1;
+  }
+}
+
+@keyframes zoomOut {
+  0% {
+    transform: scale(3);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.3;
   }
 }

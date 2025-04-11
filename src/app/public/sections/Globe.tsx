@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
+import { motion } from 'framer-motion';
 
 const GlobeComponent = () => {
   const globeRef = useRef<HTMLDivElement>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const currentRef = globeRef.current;
@@ -41,9 +41,6 @@ const GlobeComponent = () => {
       
       // Set camera position
       globe.pointOfView({ altitude: 2.5 });
-      
-      setIsLoading(false);
-
       // Handle window resize
       const handleResize = () => {
         if (currentRef) {
@@ -62,17 +59,23 @@ const GlobeComponent = () => {
   }, []);
 
   return (
-    <div 
-      ref={globeRef} 
-      className="absolute inset-0 w-full h-full cursor-grab active:cursor-grabbing"
-      style={{ 
-        position: 'absolute',
-        backgroundColor: 'transparent',
-        pointerEvents: 'auto',
-        // Its too dark without this
-        filter: 'brightness(1.5)',
+    <motion.div
+      className="absolute inset-0 z-0"
+      initial={{ x: '100%', opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ 
+        duration: 1.2,
+        ease: [0.76, 0, 0.24, 1],
       }}
-    />
+    >
+      <div 
+        ref={globeRef} 
+        className="w-full h-full"
+        style={{
+          filter: 'brightness(1.4)'
+        }}
+      />
+    </motion.div>
   );
 };
 

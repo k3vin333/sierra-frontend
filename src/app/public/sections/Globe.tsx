@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
+import { motion } from 'framer-motion';
 
 const GlobeComponent = () => {
   const globeRef = useRef<HTMLDivElement>(null);
@@ -10,34 +11,36 @@ const GlobeComponent = () => {
     const currentRef = globeRef.current;
     if (!currentRef) return;
 
-    // Dynamically import the Globe
+    // Import globe.gl component
     import('globe.gl').then(({ default: Globe }) => {
       // Initialize the globe
       const globe = new Globe(currentRef)
         .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
         .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
-        .atmosphereColor('#07100D')
-        .atmosphereAltitude(0.2)
-        .pointColor(() => '#ffcb21')
-        .pointsData([{ lat: 0, lng: 0, size: 0.1 }])
-        .pointAltitude(0)
-        .pointRadius(0.5)
-        .pointsMerge(true)
+        .atmosphereColor('#042B0B')
+        .atmosphereAltitude(0.3)
+        .showGlobe(true)
+        .showAtmosphere(true)
+        .backgroundColor('rgba(0,0,0,0)')
         .width(currentRef.clientWidth)
         .height(currentRef.clientHeight);
 
-      // Add auto-rotation
-      globe.controls().autoRotate = true;
-      globe.controls().autoRotateSpeed = 0.5;
-
-      // Initial camera position (zoomed in)
-      globe.pointOfView({ altitude: 1 });
+      // Auto-rotation settings (0 = slowest, 1 = fastest)
+      // Also allows users to manuall interact
+      const controls = globe.controls();
+      controls.enableZoom = false;
+      controls.enablePan = false;
+      controls.autoRotate = true;
+      controls.autoRotateSpeed = 1;
       
-      // Animate to final position
-      setTimeout(() => {
-        globe.pointOfView({ altitude: 2.5 }, 1500);
-      }, 100);
-
+      // Damping makes globe rotate smoothly
+      // dampingFactor controls how quickly the rotation slows down (0.05 = smooth, gradual stop)
+      // example: user releases mouse button, globe continues to rotate for a bit
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      
+      // Set camera position
+      globe.pointOfView({ altitude: 2.5 });
       // Handle window resize
       const handleResize = () => {
         if (currentRef) {
@@ -56,17 +59,23 @@ const GlobeComponent = () => {
   }, []);
 
   return (
-    <div 
-      ref={globeRef} 
-      className="absolute inset-0 w-full h-full"
-      style={{ 
-        position: 'absolute',
-        zIndex: 0,
-        opacity: 0.5,
-        transform: 'scale(3)',
-        animation: 'zoomOut 2s ease-out forwards',
+    <motion.div
+      className="absolute inset-0 z-0"
+      initial={{ x: '100%', opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ 
+        duration: 1.2,
+        ease: [0.76, 0, 0.24, 1],
       }}
-    />
+    >
+      <div 
+        ref={globeRef} 
+        className="w-full h-full"
+        style={{
+          filter: 'brightness(1.4)'
+        }}
+      />
+    </motion.div>
   );
 };
 

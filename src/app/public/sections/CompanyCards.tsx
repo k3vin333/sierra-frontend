@@ -1,55 +1,98 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
+
+type ESGData = {
+  ticker: string;
+  company_name: string;
+  historical_ratings: {
+    environmental_score: number;
+    social_score: number;
+    governance_score: number;
+    total_score: number;
+    rating: string;
+    timestamp: string;
+  }[];
+};
 
 const CompanyCards = () => {
   const companies = [
     {
       name: 'Amazon',
       domain: 'amazon.com',
-      esgScore: 'endpoint',
-      metrics: {
-        environmental: '<Placeholder>',
-        social: '<Placeholder>',
-        governance: '<Placeholder>'
-      }
+      ticker: 'AMZN'
     },
     {
       name: 'Apple',
       domain: 'apple.com',
-      esgScore: 'endpoint',
-      metrics: {
-        environmental: '<Placeholder>',
-        social: '<Placeholder>',
-        governance: '<Placeholder>'
-      }
+      ticker: 'AAPL'
     },
     {
       name: 'Google',
       domain: 'google.com',
-      esgScore: 'endpoint',
-      metrics: {
-        environmental: '<Placeholder>',
-        social: '<Placeholder>',
-        governance: '<Placeholder>'
-      }
+      ticker: 'GOOGL'
     },
     {
       name: 'Microsoft',
       domain: 'microsoft.com',
-      esgScore: 'endpoint',
-      metrics: {
-        environmental: '<Placeholder>',
-        social: '<Placeholder>',
-        governance: '<Placeholder>'
-      }
+      ticker: 'MSFT'
     }
   ];
+
+  const [esgData, setEsgData] = useState<Record<string, ESGData | null>>({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchESGData = async () => {
+      setLoading(true);
+      
+      const results: Record<string, ESGData | null> = {};
+      
+      // Fetch ESG data for each company
+      await Promise.all(
+        companies.map(async (company) => {
+          try {
+            const response = await fetch(`/api/esg?ticker=${company.ticker}`);
+            if (response.ok) {
+              const data = await response.json();
+              results[company.ticker] = data;
+            } else {
+              results[company.ticker] = null;
+              console.error(`Failed to fetch ESG data for ${company.ticker}`);
+            }
+          } catch (error) {
+            results[company.ticker] = null;
+            console.error(`Error fetching ESG data for ${company.ticker}:`, error);
+          }
+        })
+      );
+      
+      setEsgData(results);
+      setLoading(false);
+    };
+
+    fetchESGData();
+  }, []);
 
   // Function to get logo URL via our secure API route
   const getLogoUrl = (domain: string) => {
     return `/api/logo?domain=${encodeURIComponent(domain)}`;
+  };
+
+  // Get the most recent ESG score for a company
+  const getLatestESGData = (ticker: string) => {
+    const data = esgData[ticker];
+    if (!data || !data.historical_ratings || data.historical_ratings.length === 0) {
+      return null;
+    }
+    
+    // Sort by timestamp descending to get the most recent
+    const sortedRatings = [...data.historical_ratings].sort(
+      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+    
+    return sortedRatings[0];
   };
 
   return (
@@ -59,47 +102,81 @@ const CompanyCards = () => {
           Featured Companies
         </h2>
         <p className="text-center text-[#042B0B] mb-12">
-          Using Sustainalytics ESG risk methodology for comprehensive sustainability assessment
+          Using real ESG ratings based on environmental, social, and governance factors
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {companies.map((company) => (
-            <div
-              key={company.name}
-              className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="relative h-10 w-24">
-                  <Image 
-                    src={getLogoUrl(company.domain)}
-                    alt={`${company.name} logo`}
-                    fill
-                    style={{ objectFit: 'contain', objectPosition: 'left' }}
-                    sizes="(max-width: 768px) 100px, 150px"
-                  />
+          {companies.map((company) => {
+            const latestESG = getLatestESGData(company.ticker);
+            
+            return (
+              <div
+                key={company.name}
+                className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="relative h-10 w-24">
+                    <Image 
+                      src={getLogoUrl(company.domain)}
+                      alt={`${company.name} logo`}
+                      fill
+                      style={{ objectFit: 'contain', objectPosition: 'left' }}
+                      sizes="(max-width: 768px) 100px, 150px"
+                    />
+                  </div>
+                  <div className="text-2xl font-bold text-[#042B0B]">
+                    {loading ? (
+                      <span className="text-sm opacity-60">Loading...</span>
+                    ) : latestESG ? (
+                      latestESG.total_score
+                    ) : (
+                      <span className="text-sm opacity-60">No data</span>
+                    )}
+                  </div>
                 </div>
-                <div className="text-2xl font-bold text-[#042B0B]">
-                  {company.esgScore}
+                <h3 className="text-xl font-semibold text-[#042B0B] mb-4">
+                  {company.name}
+                </h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Environmental</span>
+                    <span className="font-semibold text-[#042B0B]">
+                      {loading ? (
+                        "Loading..."
+                      ) : latestESG ? (
+                        latestESG.environmental_score
+                      ) : (
+                        "No data"
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Social</span>
+                    <span className="font-semibold text-[#042B0B]">
+                      {loading ? (
+                        "Loading..."
+                      ) : latestESG ? (
+                        latestESG.social_score
+                      ) : (
+                        "No data"
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Governance</span>
+                    <span className="font-semibold text-[#042B0B]">
+                      {loading ? (
+                        "Loading..."
+                      ) : latestESG ? (
+                        latestESG.governance_score
+                      ) : (
+                        "No data"
+                      )}
+                    </span>
+                  </div>
                 </div>
               </div>
-              <h3 className="text-xl font-semibold text-[#042B0B] mb-4">
-                {company.name}
-              </h3>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Environmental</span>
-                  <span className="font-semibold text-[#042B0B]">{company.metrics.environmental}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Social</span>
-                  <span className="font-semibold text-[#042B0B]">{company.metrics.social}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Governance</span>
-                  <span className="font-semibold text-[#042B0B]">{company.metrics.governance}</span>
-                </div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

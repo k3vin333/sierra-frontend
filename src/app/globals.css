@@ -24,3 +24,7 @@ body {
   color: var(--foreground);
   font-family: 'Montserrat', sans-serif;
 }
+
+.animated-element {
+  will-change: transform, opacity;
+}

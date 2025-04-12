@@ -60,7 +60,7 @@ const GlobeComponent = () => {
 
   return (
     <motion.div
-      className="absolute inset-0 z-0"
+      className="absolute inset-0 z-0 animated-element"
       initial={{ x: '100%', opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ 
@@ -73,7 +73,8 @@ const GlobeComponent = () => {
         ref={globeRef} 
         className="w-full h-full"
         style={{
-          filter: 'brightness(1.4)'
+          filter: 'brightness(1.4)',
+          transform: 'scale(0.8)'
         }}
       />
     </motion.div>

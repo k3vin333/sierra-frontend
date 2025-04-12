@@ -62,7 +62,7 @@ const CompanyCards = () => {
           Using Sustainalytics ESG risk methodology for comprehensive sustainability assessment
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {companies.map((company, index) => (
+          {companies.map((company) => (
             <div
               key={company.name}
               className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"

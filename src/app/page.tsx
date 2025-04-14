@@ -1,7 +1,7 @@
-import LandingLayout from './public/layouts/LandingLayout';
-import Hero from './public/sections/Hero';
-import InformationSection from './public/sections/InformationSection';
-import CompanyCards from './public/sections/CompanyCards';
+import LandingLayout from './landing/layouts/LandingLayout';
+import Hero from './landing/sections/Hero';
+import InformationSection from './landing/sections/InformationSection';
+import CompanyCards from './landing/sections/CompanyCards';
 export default function Home() {
   return (
     <LandingLayout>

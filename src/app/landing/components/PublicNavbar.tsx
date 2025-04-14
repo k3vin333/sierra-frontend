@@ -16,8 +16,8 @@ const PublicNavbar = () => {
             <Link href="/price" className="hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">
               Price
             </Link>
-            <Link href="/" className="hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">
-              Main
+            <Link href="/tierlist" className="hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">
+              Tierlist
             </Link>
             <Link href="/about" className="hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">
               About

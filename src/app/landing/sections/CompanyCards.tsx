@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 
 type ESGData = {
   ticker: string;
@@ -96,22 +97,30 @@ const CompanyCards = () => {
   };
 
   return (
-    <div className="w-full bg-[#F7EFE6] py-20 min-h-screen">
+    <div className="w-full bg-[#F7EFE6] py-20 min-h-[65vh]">
       <div className="mx-auto max-w-7xl px-4">
         <h2 className="text-3xl md:text-4xl font-bold text-[#042B0B] mb-12 text-center">
           Featured Companies
         </h2>
         <p className="text-center text-[#042B0B] mb-12">
-          Using real ESG ratings based on environmental, social, and governance factors
+          Using real Sustainalytics ESG risk exposure ratings based on environmental, social, and governance factors
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {companies.map((company) => {
             const latestESG = getLatestESGData(company.ticker);
             
             return (
-              <div
+              <motion.div
                 key={company.name}
-                className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
+                className="bg-[#042B0B] p-6 shadow-lg hover:shadow-xl transition-shadow animated-element"
+                initial={{ scale: 0.98 }}
+                whileInView={{ scale: 1.05 }}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 300, 
+                  damping: 20
+                }}
+                viewport={{ once: false, margin: "-100px" }}
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className="relative h-10 w-24">
@@ -123,7 +132,7 @@ const CompanyCards = () => {
                       sizes="(max-width: 768px) 100px, 150px"
                     />
                   </div>
-                  <div className="text-2xl font-bold text-[#042B0B]">
+                  <div className="text-2xl font-bold text-white">
                     {loading ? (
                       <span className="text-sm opacity-60">Loading...</span>
                     ) : latestESG ? (
@@ -133,13 +142,13 @@ const CompanyCards = () => {
                     )}
                   </div>
                 </div>
-                <h3 className="text-xl font-semibold text-[#042B0B] mb-4">
+                <h3 className="text-xl font-semibold text-white mb-4">
                   {company.name}
                 </h3>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Environmental</span>
-                    <span className="font-semibold text-[#042B0B]">
+                    <span className="text-white/70">Environmental</span>
+                    <span className="font-semibold text-white">
                       {loading ? (
                         "Loading..."
                       ) : latestESG ? (
@@ -150,8 +159,8 @@ const CompanyCards = () => {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Social</span>
-                    <span className="font-semibold text-[#042B0B]">
+                    <span className="text-white/70">Social</span>
+                    <span className="font-semibold text-white">
                       {loading ? (
                         "Loading..."
                       ) : latestESG ? (
@@ -162,8 +171,8 @@ const CompanyCards = () => {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Governance</span>
-                    <span className="font-semibold text-[#042B0B]">
+                    <span className="text-white/70">Governance</span>
+                    <span className="font-semibold text-white">
                       {loading ? (
                         "Loading..."
                       ) : latestESG ? (
@@ -174,7 +183,7 @@ const CompanyCards = () => {
                     </span>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
@@ -183,4 +192,4 @@ const CompanyCards = () => {
   );
 };
 
-export default CompanyCards; 
+export default CompanyCards;

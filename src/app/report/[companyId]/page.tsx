@@ -37,13 +37,14 @@ export default function ReportPage() {
 
                 <Paper elevation={3} sx={{ p: 2 }}>
                     {tabIndex === 0 && <ESGTrendChart companyId={companyId} />}
+                    {tabIndex === 1 && <ESGFactorsChart companyId={companyId} />}
+                    {tabIndex === 2 && <ESGLevelChart companyId={companyId} />}
                 </Paper>
             </Box>
         </Layout>
     );
 }
 
-/*                {tabIndex === 1 && <ESGFactorsChart companyId={companyId} />}
-                {tabIndex === 2 && <ESGLevelChart companyId={companyId} />}
+/*               
                 {tabIndex === 3 && <FinanceImpactChart companyId={companyId} />}
                 */

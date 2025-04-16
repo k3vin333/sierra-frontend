@@ -93,7 +93,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setToken(null);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    router.push('/login');
   };
   
   const saveTicker = async (ticker: string) => {

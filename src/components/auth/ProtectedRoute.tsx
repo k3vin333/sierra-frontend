@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/useAuth';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -14,7 +14,9 @@ export default function ProtectedRoute({
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated && pathname !== '/login' && pathname !== '/register') {
+    // Allow access to landing page (/) and login/register pages without authentication
+    if (!isLoading && !isAuthenticated && 
+        pathname !== '/' && pathname !== '/login' && pathname !== '/register') {
       router.push('/login');
     }
   }, [isAuthenticated, isLoading, router, pathname]);

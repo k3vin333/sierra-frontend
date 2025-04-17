@@ -17,7 +17,7 @@ export default function RegisterPage() {
           <p className="text-gray-600 mb-8">
             Already a member of SIERRA? <Link href="/login" className="font-bold">Login</Link>.
           </p>
-          <Form action="/dashboard">
+          <Form action="/feature">
               <div className="mb-4">
                 <label className="block text-sm font-medium text-[#042B0B] mb-1">Email</label>
                 <input 

@@ -11,14 +11,12 @@ export default function DashboardPage() {
   
   const handleLogout = async () => {
     try {
-      // First navigate away
+      // First navigate to landing page
       router.push('/');
-      // Then perform logout after navigation has started
-      // Fixes the issue where the logout function is called before the navigation is complete
-      // Causing the username to be removed in the navbar before the page is redirected
+      // Then logout after a short delay to allow navigation to complete
       setTimeout(() => {
         logout();
-      }, 1000);
+      }, 200);
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -44,4 +42,4 @@ export default function DashboardPage() {
       </div>
     </ProtectedRoute>
   );
-} 
+}

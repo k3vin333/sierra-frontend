@@ -1,7 +1,6 @@
 'use client';
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 
 interface User {
   // Define the schema for the user object the same as the backend

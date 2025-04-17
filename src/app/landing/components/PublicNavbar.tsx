@@ -6,20 +6,24 @@ import { useAuth } from '@/context/useAuth';
 import { useRouter } from 'next/navigation';
 
 const PublicNavbar = () => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
   const router = useRouter();
   
   const handleLogout = async () => {
     try {
-      // First navigate away
+      // First stay on current page but prepare for refresh
       router.push('/');
-      // Then perform logout after navigation has started
+      // Delay logout to make sure the navigation is processed
       setTimeout(() => {
         logout();
-      }, 100);
+      }, 200);
     } catch (error) {
       console.error("Logout error:", error);
     }
+  };
+
+  const handleDashboard = () => {
+    router.push('/dashboard');
   };
 
   return (
@@ -49,20 +53,20 @@ const PublicNavbar = () => {
 
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
-              <>
-                <Link href="/dashboard" className="hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={handleDashboard}
+                  className="bg-[#042B0B] hover:bg-[#1D4023] text-white px-4 py-2 rounded-md text-sm font-medium"
+                >
                   Dashboard
-                </Link>
-                <div className="flex items-center space-x-3">
-                  <span>{user?.name}</span>
-                  <button
-                    onClick={handleLogout}
-                    className="bg-[#042B0B] hover:bg-[#1D4023] text-white px-4 py-2 rounded-md text-sm font-medium"
-                  >
-                    Logout
-                  </button>
-                </div>
-              </>
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="border border-[#042B0B] text-[#042B0B] hover:bg-gray-100 px-4 py-2 rounded-md text-sm font-medium"
+                >
+                  Logout
+                </button>
+              </div>
             ) : (
               <>
                 <Link href="/login" className="hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">

@@ -37,6 +37,9 @@ const PublicNavbar = () => {
 
           {/* Centered Navigation Links */}
           <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center space-x-12">
+          <Link href="/" className="hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">
+              Home
+            </Link>
             <Link href="/price" className="hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">
               Price
             </Link>

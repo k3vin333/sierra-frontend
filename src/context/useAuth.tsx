@@ -24,7 +24,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   register: (email: string, password: string, name: string) => Promise<boolean>;
   logout: () => void;
-  saveTicker: (ticker: string) => Promise<any>;
+  saveTicker: (ticker: string) => Promise<{ success: boolean; message?: string }>;
   getTickers: () => Promise<TickerData[]>;
 }
 

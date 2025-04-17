@@ -1,12 +1,18 @@
 'use client';
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface User {
   // Define the schema for the user object the same as the backend
   email: string;
   name: string;
   user_id: string;
+}
+
+interface TickerData {
+  ticker: string;
+  created_at: string;
 }
 
 interface AuthContextType {
@@ -18,7 +24,8 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   register: (email: string, password: string, name: string) => Promise<boolean>;
   logout: () => void;
-  saveTicker: (ticker: string) => Promise<{ success: boolean; message?: string }>;
+  saveTicker: (ticker: string) => Promise<any>;
+  getTickers: () => Promise<TickerData[]>;
 }
 
 // Define the context for the user object the same as the backend
@@ -111,16 +118,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   
   const saveTicker = async (ticker: string) => {
     try {
-      // HAS TO HAVE AUTHENTICATION TO SAVE TICKER!
       if (!token) {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch('https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/auth/tickers', {
+      // Try using query parameter token instead of headers
+      const response = await fetch(`https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/auth/tickers?token=${token}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ ticker })
       });
@@ -128,15 +134,41 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const data = await response.json();
       
       if (response.ok) {
-        // If the response is successful, then we return the data
         return data;
       } else {
-        // If the response is not successful, then we throw an error
         throw new Error(data.message || 'Failed to save ticker');
       }
     } catch (error) {
       console.error('Save ticker error:', error);
       throw error;
+    }
+  };
+
+  const getTickers = async (): Promise<TickerData[]> => {
+    try {
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      // Try using query parameter token instead of headers
+      const response = await fetch(`https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/auth/tickers?token=${token}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        return data.tickers || [];
+      } else {
+        throw new Error(data.message || 'Failed to retrieve tickers');
+      }
+    } catch (error) {
+      console.error('Get tickers error:', error);
+      // Return empty array instead of throwing to prevent component crashes
+      return [];
     }
   };
   
@@ -170,7 +202,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       login, 
       register, 
       logout,
-      saveTicker
+      saveTicker,
+      getTickers
     }}>
       {children}
     </AuthContext.Provider>

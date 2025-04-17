@@ -5,7 +5,6 @@ import PublicNavbar from '../landing/components/PublicNavbar';
 import { columns } from './columns';
 import { DataTable } from './data-tables';
 import { ESGData } from './columns';
-import { useRouter } from 'next/navigation';
 
 interface LandingLayoutProps {
   children: React.ReactNode;

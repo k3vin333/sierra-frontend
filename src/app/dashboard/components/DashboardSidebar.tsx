@@ -36,7 +36,7 @@ const menuItems = [
   },
   {
     label: 'Reports',
-    href: '/reports',
+    href: '/dashboard/reports',
     icon: FileTextIcon
   },
   {

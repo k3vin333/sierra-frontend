@@ -38,27 +38,27 @@ const PublicNavbar = () => {
           {/* Centered Navigation Links */}
           <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center space-x-6">
             <div className="border-b-2 border-[#042B0B] pb-1">
-              <Link href="/" className="hover:text-gray-500 px-3 py-2 text-sm font-medium">
+              <Link href="/" className="hover:text-[#1D4023] px-3 py-2 text-sm font-medium">
                 Home
               </Link>
             </div>
             <div className="border-b-2 border-[#042B0B] pb-1">
-              <Link href="/price" className="hover:text-gray-500 px-3 py-2 text-sm font-medium">
+              <Link href="/price" className="hover:text-[#1D4023] px-3 py-2 text-sm font-medium">
                 Price
               </Link>
             </div>
             <div className="border-b-2 border-[#042B0B] pb-1">
-              <Link href="/tierlist" className="hover:text-gray-500 px-3 py-2 text-sm font-medium">
+              <Link href="/tierlist" className="hover:text-[#1D4023] px-3 py-2 text-sm font-medium">
                 Tierlist
               </Link>
             </div>
             <div className="border-b-2 border-[#042B0B] pb-1">
-              <Link href="/about" className="hover:text-gray-500 px-3 py-2 text-sm font-medium">
+              <Link href="/about" className="hover:text-[#1D4023] px-3 py-2 text-sm font-medium">
                 About
               </Link>
             </div>
             <div className="border-b-2 border-[#042B0B] pb-1">
-              <Link href="/contact" className="hover:text-gray-500 px-3 py-2 text-sm font-medium">
+              <Link href="/contact" className="hover:text-[#1D4023] px-3 py-2 text-sm font-medium">
                 Contact
               </Link>
             </div>
@@ -82,7 +82,7 @@ const PublicNavbar = () => {
               </div>
             ) : (
               <>
-                <Link href="/login" className="hover:text-gray-500 px-3 py-2 rounded-md text-sm font-medium">
+                <Link href="/login" className="hover:text-[#1D4023] px-3 py-2 rounded-md text-sm font-medium">
                   Login
                 </Link>
                 <Link href="/register" className="bg-[#042B0B] hover:bg-[#1D4023] text-white px-4 py-2 rounded-md text-sm font-medium">

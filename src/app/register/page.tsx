@@ -48,7 +48,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#EFDDC9] flex">
+    <div className="min-h-screen bg-[#042B0B] flex">
       {/* Left half - empty (will put some images here later) */}
       <div className="w-1/2"></div>
       

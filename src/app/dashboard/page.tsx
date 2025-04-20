@@ -4,8 +4,10 @@ import React, { useState, useRef } from 'react';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import DashboardSidebar from './components/DashboardSidebar';
 import CompanyRatingWidget from '../widgets/components/LevelACompaniesWidget';
+import ESGCompanyBarChartsSearch from '../widgets/components/ESGCompanyBarChartsSearch';
 import CompanyESGChart from '../widgets/components/CompanyESGChart';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import AllCompaniesESGChart from '../widgets/components/AllCompaniesESGChart';
 
 export default function DashboardPage() {
     const [isCompaniesWidgetExpanded, setIsCompaniesWidgetExpanded] = useState(true);
@@ -60,6 +62,12 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
+              <div className="space-y-10">
+                <ESGCompanyBarChartsSearch />
+              </div>
+              <div className="space-y-10">
+                <AllCompaniesESGChart />
+              </div>   
             </div>
           </div>
         </div>

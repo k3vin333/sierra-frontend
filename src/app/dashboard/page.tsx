@@ -1,16 +1,15 @@
-// app/dashboard/page.tsx
-
 'use client';
 
-import LevelACompaniesWidget from "../widgets/components/LevelACompaniesWidget";
-import CompanyESGChart from "../widgets/components/CompanyESGChart";
+import React from 'react';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import DashboardSidebar from './components/DashboardSidebar';
 
 export default function DashboardPage() {
   return (
-    <main className="p-6">
-      <h1 className="text-2xl font-bold mb-4">📊 Level A Companies</h1>
-      <LevelACompaniesWidget />
-      <CompanyESGChart />
-    </main>
+    <ProtectedRoute>
+      <div className="min-h-screen flex bg-[#F7EFE6]">
+        <DashboardSidebar />
+      </div>
+    </ProtectedRoute>
   );
 }

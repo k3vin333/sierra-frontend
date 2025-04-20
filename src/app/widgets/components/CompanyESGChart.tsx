@@ -76,20 +76,20 @@ export default function CompanyESGChart() {
   }
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <CardTitle>ESG Score Trends</CardTitle>
             <CardDescription>Search ESG scores by ticker symbol</CardDescription>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full sm:w-auto">
             <Input
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="e.g. AAPL"
-              className="w-32"
+              className="w-full sm:w-32"
             />
             <Button onClick={handleSearch} variant="outline" size="sm">
               <Search className="w-4 h-4 mr-1" />
@@ -109,11 +109,16 @@ export default function CompanyESGChart() {
               Social: { label: "Social", color: "#10b981" },
               Governance: { label: "Governance", color: "#65a30d" },
             }}
+            className="w-full h-[300px] overflow-hidden"
           >
             <AreaChart
               accessibilityLayer
               data={chartData}
               margin={{ left: 12, right: 12, top: 12 }}
+              width={800}
+              height={300}
+              className="w-full"
+              style={{ maxWidth: "100%" }}
             >
               <CartesianGrid vertical={false} />
               <XAxis

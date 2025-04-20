@@ -16,8 +16,6 @@ type Company = {
   last_processed_date: string;
 };
 
-
-
 export default function LevelACompaniesWidget() {
   const [companies, setCompanies] = useState<Company[]>([]);
 
@@ -28,7 +26,7 @@ export default function LevelACompaniesWidget() {
   }, []);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {companies.map((company) => (
         <WidgetCard
           key={company.ticker}
@@ -41,7 +39,6 @@ export default function LevelACompaniesWidget() {
               <span className="text-purple-700 font-medium">G:</span> {company.governance_score}
             </>
           }
-          
           badge={`Rating: ${company.rating}`}
           footer={`Last updated: ${company.last_processed_date}`}
         />
@@ -49,3 +46,4 @@ export default function LevelACompaniesWidget() {
     </div>
   );
 }
+

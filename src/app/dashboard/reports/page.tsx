@@ -12,6 +12,60 @@ import { Button } from '@/components/ui/button';
 
 const API_KEY = 'cvt6ephr01qhup0ui9v0cvt6ephr01qhup0ui9vg';
 
+// Basic data table component
+const DataTable = () => {
+  // Sample data
+  const data = [
+    {
+      id: "728ed52f",
+      amount: 100,
+      status: "pending",
+      email: "m@example.com",
+    },
+    {
+      id: "489e1d42",
+      amount: 125,
+      status: "processing",
+      email: "example@gmail.com",
+    },
+    {
+      id: "489e1d42",
+      amount: 125,
+      status: "success",
+      email: "test@example.com",
+    },
+    {
+      id: "489e1d42",
+      amount: 125,
+      status: "failed",
+      email: "user@example.com",
+    },
+  ];
+
+  return (
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Status</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead className="text-right">Amount</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data.map((row) => (
+            <TableRow key={row.id}>
+              <TableCell>{row.status}</TableCell>
+              <TableCell>{row.email}</TableCell>
+              <TableCell className="text-right">${row.amount.toFixed(2)}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+};
+
 const OcrReader = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [ocrResult, setOcrResult] = useState<string>('');
@@ -69,7 +123,7 @@ const OcrReader = () => {
   };
 
   const handleTickerClick = (ticker: string) => {
-    // Add ticker to saved tickers
+    
   };
 
   const readImageText = async () => {
@@ -148,10 +202,16 @@ export default function ReportsPage() {
     <ProtectedRoute>
       <div className="min-h-screen flex bg-[#F7EFE6]">
         <DashboardSidebar />
-        <div className="flex-1 flex flex-col p-8">
+        <div className="flex-1 p-8">
           <h1 className="text-2xl font-bold text-[#042B0B] mb-6">Import your portfolio</h1>
-          <div className="bg-white p-6 rounded-lg shadow-md max-w-3xl">
-            <OcrReader />
+          <div className="flex w-full h-full">
+            <div className="bg-white p-6 rounded-lg shadow-md w-1/2 h-1/2 mr-3">
+              <OcrReader />
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-md w-1/2 h-1/2 ml-3">
+              <h2 className="text-xl font-bold text-[#042B0B] mb-4">Portfolio Data</h2>
+              <DataTable />
+            </div>
           </div>
         </div>
       </div>

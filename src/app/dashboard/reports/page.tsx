@@ -7,6 +7,8 @@ import { useState } from 'react';
 import { createWorker } from 'tesseract.js';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import DashboardSidebar from '../components/DashboardSidebar';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 
 const API_KEY = 'cvt6ephr01qhup0ui9v0cvt6ephr01qhup0ui9vg';
 
@@ -66,6 +68,10 @@ const OcrReader = () => {
     return tickers;
   };
 
+  const handleTickerClick = (ticker: string) => {
+    // Add ticker to saved tickers
+  };
+
   const readImageText = async () => {
     if (!selectedImage) return;
 
@@ -123,9 +129,15 @@ const OcrReader = () => {
 
       <p style={{ marginTop: 20, fontWeight: 700 }}>Status:</p>
       <p>{ocrStatus}</p>
-      <h3 style={{ marginTop: 10, fontWeight: 700 }}>Extracted Tickers:</h3>
       {validatedTickers.length > 0 && (
-        <p>{validatedTickers.join(', ')}</p>
+        <div className="flex flex-wrap gap-2">
+          <h3 style={{ marginTop: 10, fontWeight: 700 }}>Extracted Tickers:</h3>
+          {validatedTickers.map((ticker) => (
+            <Button key={ticker} variant="outline" onClick={() => handleTickerClick(ticker)}>
+              {ticker}
+            </Button>
+          ))}
+        </div>
       )}
     </div>
   );

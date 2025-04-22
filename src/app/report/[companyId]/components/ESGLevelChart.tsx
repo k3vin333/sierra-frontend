@@ -66,7 +66,18 @@ export default function ESGLevelChart({ companyId }: Props) {
         <>
             <Typography variant="h6" gutterBottom>
                 ESG Rating Over Time
-                <Tooltip title="ESG ratings range from A (best performance) to E (worst performance), reflecting overall ESG risk level." placement="right">
+                <Tooltip title="ESG ratings range from A (best performance) to E (worst performance), reflecting overall ESG risk level."
+                    placement="right"
+                    componentsProps={{
+                        tooltip: {
+                            sx: {
+                                fontSize: '0.9rem',
+                                maxWidth: 300,
+                                padding: 1.5,
+                            },
+                        },
+                    }}
+                >
                     <InfoOutlinedIcon sx={{ ml: 1, fontSize: 20, verticalAlign: 'middle', cursor: 'pointer' }} />
                 </Tooltip>
             </Typography>

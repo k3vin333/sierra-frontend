@@ -31,7 +31,7 @@ export default function ReportPage() {
                 </Typography>
 
                 <Tabs value={tabIndex} onChange={handleTabChange} sx={{ mb: 3 }}>
-                    <Tab label="Total ESG Trend" />
+                    <Tab label="Total ESG Risk Trend" />
                     <Tab label="ESG Factors" />
                     <Tab label="ESG Level" />
                     <Tab label="Finance Impact" />

@@ -114,18 +114,20 @@ export function DataTable<TData extends { ticker: string }, TValue>({
                   
                   {isExpanded && (
                     <TableRow>
-                      <TableCell colSpan={columns.length}>
-                        <div className="p-4">
-                          {historicalData[ticker] ? (
-                            <div className="h-64">
-                              <h3 className="text-lg font-semibold mb-2">Historical ESG Data for {ticker.toUpperCase()}</h3>
-                              <div className="w-full h-48">
-                                {/* Place chart here.*/}
-                                <HistoricalChart data={historicalData[ticker]} />
-                              </div>
+                      <TableCell colSpan={columns.length} className="p-0">
+                        <div className="p-4 bg-gray-50">
+                          <h3 className="text-lg font-semibold mb-4">
+                            ESG History for {ticker.toUpperCase()}
+                          </h3>
+                          {loadingTickers[ticker] ? (
+                            <div className="flex justify-center items-center h-64">
+                              <p>Loading data...</p>
                             </div>
                           ) : (
-                            <div className="text-center py-4">Loading historical data...</div>
+                            <ESGChart 
+                              ticker={ticker} 
+                              historicalData={historicalData[ticker] || []} 
+                            />
                           )}
                         </div>
                       </TableCell>

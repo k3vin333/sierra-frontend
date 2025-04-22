@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch companies' }, { status: res.status });
     }
 
+    console.log(request);
     const data = await res.json();
 
     return NextResponse.json(data, {

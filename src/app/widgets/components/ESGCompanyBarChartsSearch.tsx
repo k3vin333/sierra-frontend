@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { BarChart, Bar, CartesianGrid, XAxis } from 'recharts';
 import { ChevronUp, TrendingUp } from 'lucide-react';
 

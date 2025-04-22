@@ -67,8 +67,8 @@ export default function ESGPrediction({ companyId }: Props) {
 
     const diff = prediction - currentScore;
     const trend =
-        diff > 0 ? "down" : diff < 0 ? "up" : "same";
-    const color = trend === "up" ? green[600] : trend === "down" ? red[600] : grey[600];
+        diff > 0 ? "up" : diff < 0 ? "down" : "same";
+    const color = trend === "up" ? red[600] : trend === "down" ? green[600] : grey[600];
     const Icon =
         trend === "up"
             ? TrendingUpIcon
@@ -95,7 +95,7 @@ export default function ESGPrediction({ companyId }: Props) {
                     color={color}
                 >
                     <Icon fontSize="large" />
-                    ESG Total Score Predicted to {trend === "up" ? "Increase" : trend === "down" ? "Decrease" : "Stay the Same"}
+                    Total ESG Risk Score Predicted to {trend === "up" ? "Increase" : trend === "down" ? "Decrease" : "Stay the Same"}
                     <Tooltip
                         title="This prediction is generated using a model trained on ESG data from the past 5 years. 
                         It uses the last 3 months of total ESG scores to forecast the next month's score."

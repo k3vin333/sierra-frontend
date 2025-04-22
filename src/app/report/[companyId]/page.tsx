@@ -10,6 +10,7 @@ import ESGFactorsChart from "./components/ESGFactorsChart";
 import ESGLevelChart from "./components/ESGLevelChart";
 import FinanceImpactChart from "./components/FinanceImpactChart";
 import ESGPrediction from "./components/ESGPrediction";
+import ReportCharts from "../../../components/ReportCharts"
 
 
 export default function ReportPage() {
@@ -37,12 +38,7 @@ export default function ReportPage() {
                     <Tab label="Finance Impact" />
                 </Tabs>
 
-                <Paper elevation={3} sx={{ p: 2 }}>
-                    {tabIndex === 0 && <ESGTrendChart companyId={companyId} />}
-                    {tabIndex === 1 && <ESGFactorsChart companyId={companyId} />}
-                    {tabIndex === 2 && <ESGLevelChart companyId={companyId} />}
-                    {tabIndex === 3 && <FinanceImpactChart companyId={companyId} />}
-                </Paper>
+                <ReportCharts companyId={companyId} />
             </Box>
         </Layout>
     );

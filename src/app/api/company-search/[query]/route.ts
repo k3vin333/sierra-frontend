@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server';
 
+interface RouteParams {
+  params: {
+    query: string;
+  };
+}
+
 export async function GET(
   request: Request,
-  { params }: { params: { query: string } }
+  { params }: RouteParams
 ){
   try {
     const res = await fetch(`https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/search/company/${params.query}`);

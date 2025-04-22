@@ -11,6 +11,7 @@ export async function GET(_: NextRequest, { params }: { params: { query: string 
       },
     });
   } catch (error) {
+    console.error('Failed to fetch companies:', error); 
     return NextResponse.json({ error: 'Failed to fetch companies' }, { status: 500 });
   }
 }

@@ -50,22 +50,23 @@ const CompanyCards = () => {
       setLoading(true);
 
       const results: Record<string, ESGData | null> = {};
-
+      const tickers = ['AMZN', 'AAPL', 'GOOGL', 'MSFT'];
+      
       // Fetch ESG data for each company
       await Promise.all(
-        companies.map(async (company) => {
+        tickers.map(async (ticker) => {
           try {
-            const response = await fetch(`/api/esg?ticker=${company.ticker}`);
+            const response = await fetch(`/api/esg?ticker=${ticker}`);
             if (response.ok) {
               const data = await response.json();
-              results[company.ticker] = data;
+              results[ticker] = data;
             } else {
-              results[company.ticker] = null;
-              console.error(`Failed to fetch ESG data for ${company.ticker}`);
+              results[ticker] = null;
+              console.error(`Failed to fetch ESG data for ${ticker}`);
             }
           } catch (error) {
-            results[company.ticker] = null;
-            console.error(`Error fetching ESG data for ${company.ticker}:`, error);
+            results[ticker] = null;
+            console.error(`Error fetching ESG data for ${ticker}:`, error);
           }
         })
       );

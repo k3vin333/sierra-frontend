@@ -3,8 +3,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import GlobeComponent from './Globe';
+import { useRouter } from 'next/navigation';
 
 const Hero = () => {
+  const router = useRouter();
   // Split the sub-headline into words for staggered animation
   const subHeadlineWords = "All in one platform to choose analyze and compare companies.".split(" ");
 
@@ -66,6 +68,7 @@ const Hero = () => {
               ease: "easeOut",
               delay: 0.6
             }}
+            onClick={() => router.push('/register')}
           >
             Explore Sierra
           </motion.button>

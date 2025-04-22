@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/table"
 
 import React, { useState } from "react"
-import { ESGData } from "./columns"
+import { ESGChart } from "@/components/esg-chart"
 
 interface DataTableProps<TData extends { ticker: string }, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -32,6 +32,7 @@ export function DataTable<TData extends { ticker: string }, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [expanded, setExpanded] = useState<ExpandedState>({})
   const [historicalData, setHistoricalData] = useState<Record<string, any>>({})
+  const [loadingTickers, setLoadingTickers] = useState<Record<string, boolean>>({})
 
   const table = useReactTable({
     data,
@@ -47,17 +48,22 @@ export function DataTable<TData extends { ticker: string }, TValue>({
 
 
   const fetchHistoricalData = async (ticker: string) => {
-    if (!historicalData[ticker]) {
-      try {
-        const response = await fetch(`/api/esg?ticker=${ticker.toLowerCase()}`)
-        const data = await response.json()
-        setHistoricalData(prev => ({
-          ...prev,
-          [ticker]: data
-        }))
-      } catch (error) {
-        console.error('Error fetching historical data:', error)
-      }
+    if (historicalData[ticker] || loadingTickers[ticker]) return
+    
+    setLoadingTickers(prev => ({ ...prev, [ticker]: true }))
+    
+    try {
+      const response = await fetch(`/api/esg?ticker=${ticker.toLowerCase()}`)
+      const data = await response.json()
+      
+      setHistoricalData(prev => ({
+        ...prev,
+        [ticker]: data.historical_ratings || []
+      }))
+    } catch (error) {
+      console.error('Error fetching historical data:', error)
+    } finally {
+      setLoadingTickers(prev => ({ ...prev, [ticker]: false }))
     }
   }
 

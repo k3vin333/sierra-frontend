@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import Link from "next/link";
 
 type ESGData = {
   ticker: string;
@@ -47,9 +48,9 @@ const CompanyCards = () => {
   useEffect(() => {
     const fetchESGData = async () => {
       setLoading(true);
-      
+
       const results: Record<string, ESGData | null> = {};
-      
+
       // Fetch ESG data for each company
       await Promise.all(
         companies.map(async (company) => {
@@ -68,7 +69,7 @@ const CompanyCards = () => {
           }
         })
       );
-      
+
       setEsgData(results);
       setLoading(false);
     };
@@ -87,12 +88,12 @@ const CompanyCards = () => {
     if (!data || !data.historical_ratings || data.historical_ratings.length === 0) {
       return null;
     }
-    
+
     // Sort by timestamp descending to get the most recent
     const sortedRatings = [...data.historical_ratings].sort(
       (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
-    
+
     return sortedRatings[0];
   };
 
@@ -108,87 +109,88 @@ const CompanyCards = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {companies.map((company) => {
             const latestESG = getLatestESGData(company.ticker);
-            
+
             return (
-              <motion.div
-                key={company.name}
-                className="bg-[#042B0B] p-6 shadow-lg hover:shadow-xl transition-shadow animated-element"
-                initial={{ scale: 0.98 }}
-                whileInView={{ scale: 1.05 }}
-                transition={{ 
-                  type: "spring", 
-                  stiffness: 300, 
-                  damping: 20
-                }}
-                viewport={{ once: false, margin: "-100px" }}
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="relative h-10 w-24">
-                    <Image 
-                      src={getLogoUrl(company.domain)}
-                      alt={`${company.name} logo`}
-                      fill
-                      style={{ objectFit: 'contain', objectPosition: 'left' }}
-                      sizes="(max-width: 768px) 100px, 150px"
-                    />
-                  </div>
-                  <div className="text-2xl font-bold text-white">
-                    {loading ? (
-                      <span className="text-sm opacity-60">Loading...</span>
-                    ) : latestESG ? (
-                      latestESG.total_score
-                    ) : (
-                      <span className="text-sm opacity-60">No data</span>
-                    )}
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold text-white mb-4">
-                  {company.name}
-                </h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-white/70">Environmental</span>
-                    <span className="font-semibold text-white">
+                <motion.div
+                  key={company.name}
+                  className="bg-[#042B0B] p-6 shadow-lg hover:shadow-xl transition-shadow animated-element"
+                  initial={{ scale: 0.98 }}
+                  whileInView={{ scale: 1.05 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 20
+                  }}
+                  viewport={{ once: false, margin: "-100px" }}
+                >
+
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="relative h-10 w-24">
+                      <Image
+                        src={getLogoUrl(company.domain)}
+                        alt={`${company.name} logo`}
+                        fill
+                        style={{ objectFit: 'contain', objectPosition: 'left' }}
+                        sizes="(max-width: 768px) 100px, 150px"
+                      />
+                    </div>
+                    <div className="text-2xl font-bold text-white">
                       {loading ? (
-                        "Loading..."
+                        <span className="text-sm opacity-60">Loading...</span>
                       ) : latestESG ? (
-                        latestESG.environmental_score
+                        latestESG.total_score
                       ) : (
-                        "No data"
+                        <span className="text-sm opacity-60">No data</span>
                       )}
-                    </span>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/70">Social</span>
-                    <span className="font-semibold text-white">
-                      {loading ? (
-                        "Loading..."
-                      ) : latestESG ? (
-                        latestESG.social_score
-                      ) : (
-                        "No data"
-                      )}
-                    </span>
+                  <h3 className="text-xl font-semibold text-white mb-4">
+                    {company.name}
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-white/70">Environmental</span>
+                      <span className="font-semibold text-white">
+                        {loading ? (
+                          "Loading..."
+                        ) : latestESG ? (
+                          latestESG.environmental_score
+                        ) : (
+                          "No data"
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-white/70">Social</span>
+                      <span className="font-semibold text-white">
+                        {loading ? (
+                          "Loading..."
+                        ) : latestESG ? (
+                          latestESG.social_score
+                        ) : (
+                          "No data"
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-white/70">Governance</span>
+                      <span className="font-semibold text-white">
+                        {loading ? (
+                          "Loading..."
+                        ) : latestESG ? (
+                          latestESG.governance_score
+                        ) : (
+                          "No data"
+                        )}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/70">Governance</span>
-                    <span className="font-semibold text-white">
-                      {loading ? (
-                        "Loading..."
-                      ) : latestESG ? (
-                        latestESG.governance_score
-                      ) : (
-                        "No data"
-                      )}
-                    </span>
-                  </div>
-                </div>
               </motion.div>
-            );
+        );
           })}
-        </div>
       </div>
     </div>
+    </div >
   );
 };
 

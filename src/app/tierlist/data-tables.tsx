@@ -148,31 +148,3 @@ export function DataTable<TData extends { ticker: string }, TValue>({
     </div>
   )
 }
-
-
-// Simple chart Idk how to make an actual chart so this is gonna do
-function HistoricalChart({ data }: { data: any }) {
-  const historicalPoints = Array.isArray(data) ? data : [];
-  
-  return (
-    <div className="relative w-full h-full">
-      <div className="flex items-end h-40 border-b border-l border-gray-300">
-        {historicalPoints.map((point, index) => (
-          <div key={index} className="flex-1 flex flex-col items-center">
-            <div 
-              className="w-4 bg-blue-500 rounded-t hover:bg-blue-600"
-              style={{ height: `${(point.total_score / 20) * 100}%` }}
-              title={`Score: ${point.total_score}`}
-            />
-            <div className="text-xs mt-1">
-              {new Date(point.timestamp).toLocaleDateString('en-US', { month: 'short' })}
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="text-center mt-2 text-sm font-medium">
-        Historical ESG Scores
-      </div>
-    </div>
-  )
-}

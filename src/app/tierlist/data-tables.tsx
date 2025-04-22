@@ -21,25 +21,25 @@ import {
 import React, { useState } from "react"
 import { ESGData } from "./columns"
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends { ticker: string }, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends { ticker: string }, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
-  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({})
+  const [expanded, setExpanded] = useState<ExpandedState>({})
   const [historicalData, setHistoricalData] = useState<Record<string, any>>({})
 
   const table = useReactTable({
     data,
     columns,
     state: {
-      expanded: expandedRows,
+      expanded,
     },
-    onExpandedChange: setExpandedRows,
+    onExpandedChange: setExpanded,
     getSubRows: () => [],
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),

@@ -67,7 +67,7 @@ export default function ESGPrediction({ companyId }: Props) {
 
     const diff = prediction - currentScore;
     const trend =
-        diff > 0 ? "up" : diff < 0 ? "down" : "same";
+        diff > 0 ? "down" : diff < 0 ? "up" : "same";
     const color = trend === "up" ? green[600] : trend === "down" ? red[600] : grey[600];
     const Icon =
         trend === "up"

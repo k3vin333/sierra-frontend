@@ -11,7 +11,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/useAuth';
 
-const API_KEY = 'cvt6ephr01qhup0ui9v0cvt6ephr01qhup0ui9vg';
+// Use environment variable if available, otherwise use a placeholder
+// In production, this should be properly configured in your deployment environment
+const getFinnhubApiKey = () => {
+  // For client-side code, use NEXT_PUBLIC_ prefix for environment variables
+  if (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_FINNHUB_API_KEY) {
+    return process.env.NEXT_PUBLIC_FINNHUB_API_KEY;
+  }
+  
+  // Fallback for development or if env variable is not set
+  // In production, ensure the environment variable is properly set
+  return 'placeholder_api_key_for_development';
+};
 
 // Define a type for portfolio items
 type PortfolioItem = {
@@ -94,9 +105,10 @@ const OcrReader = ({ onAddTicker }: { onAddTicker: (ticker: string) => void }) =
 
     // Now for final check, we use FINNHUB api to see if a ticker returns
     // a valid body which isnt an error, and push to tickersAreValid
+    const apiKey = getFinnhubApiKey();
     const tickersAreValid: string[] = [];
     for (const ticker of tickers) {
-      const res = await fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${API_KEY}`);
+      const res = await fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${apiKey}`);
       const data = await res.json();
       // Check if response is not an error and has valid data
       if (data && !data.error && Object.keys(data).length > 0) {
@@ -227,7 +239,8 @@ export default function ReportsPage() {
   // Fetch stock details from API
   const fetchStockDetails = async (ticker: string): Promise<PortfolioItem | null> => {
     try {
-      const res = await fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${API_KEY}`);
+      const apiKey = getFinnhubApiKey();
+      const res = await fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${apiKey}`);
       const companyData = await res.json();
       
       if (!companyData.name) {

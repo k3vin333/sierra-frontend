@@ -40,7 +40,12 @@ export default function ESGCompanyBarCharts() {
     try {
       const res = await fetch(`/api/company-search/${query}`);
       const json = await res.json();
-      const tickers = [...new Set(json.companies.map((c: any) => c.ticker.toLowerCase()))];
+      
+      const tickers = Array.isArray(json.companies)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ? [...new Set(json.companies.map((c: any) => c.ticker?.toLowerCase()))]
+        : [];
+
 
       const grouped: Record<string, ChartDataPoint[]> = {};
 
@@ -51,6 +56,7 @@ export default function ESGCompanyBarCharts() {
         if (data?.historical_ratings?.length) {
           const key = `${data.historical_ratings[0].company_name}::${data.ticker.toUpperCase()}`;
 
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const chartData: ChartDataPoint[] = data.historical_ratings.map((entry: any) => ({
             date: new Date(entry.timestamp).toLocaleDateString('en-AU', {
               year: '2-digit',

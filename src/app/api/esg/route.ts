@@ -27,3 +27,4 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Fetching ESG data failed' }, { status: 500 });
   }
 } 
+

@@ -1,9 +1,10 @@
-// src/app/api/company-search/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const query = searchParams.get('query');
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { query: string } }
+) {
+  const query = params.query;
 
   if (!query) {
     return NextResponse.json({ error: 'Query parameter required' }, { status: 400 });

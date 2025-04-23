@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, Suspense } from 'react';
 // import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -36,7 +36,17 @@ const tickersMap: Record<string, string[]> = {
   '3_4': ['MCD', 'SBUX']
 };
 
-export default function CompletePage() {
+// Loading fallback component
+function LoadingFallback() {
+  return (
+    <div className="w-full bg-[#F7EFE6] py-20 min-h-[65vh] flex items-center justify-center">
+      <div className="text-[#042B0B] text-xl">Loading questionnaire results...</div>
+    </div>
+  );
+}
+
+// Main content component that uses useSearchParams
+function CompletePageContent() {
   const { saveTicker } = useAuth();
   // const router = useRouter();
 
@@ -123,99 +133,108 @@ export default function CompletePage() {
   // fetchData();
 
   return (
-<div className="w-full bg-[#F7EFE6] py-20 min-h-[65vh]">
-  <div className="mx-auto max-w-7xl px-4">
-    <h2 className="text-3xl md:text-4xl font-bold text-[#042B0B] mb-12 text-center">
-      Thank you for completing the questionnaire!
-    </h2>
-    <p className="text-center text-[#042B0B] mb-12">
-      We have collected some companies we think you may be interested in...
-    </p>
+    <div className="w-full bg-[#F7EFE6] py-20 min-h-[65vh]">
+      <div className="mx-auto max-w-7xl px-4">
+        <h2 className="text-3xl md:text-4xl font-bold text-[#042B0B] mb-12 text-center">
+          Thank you for completing the questionnaire!
+        </h2>
+        <p className="text-center text-[#042B0B] mb-12">
+          We have collected some companies we think you may be interested in...
+        </p>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 justify-items-center">
-      {recommendedTickers.map((ticker) => {
-        const companyName = getLatestESGData(ticker)?.name;
-        const latestESG = getLatestESGData(ticker)?.rating;
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 justify-items-center">
+          {recommendedTickers.map((ticker) => {
+            const companyName = getLatestESGData(ticker)?.name;
+            const latestESG = getLatestESGData(ticker)?.rating;
 
-        return (
-          <motion.div
-            key={companyName}
-            className="bg-[#042B0B] p-6 shadow-lg hover:shadow-xl transition-shadow animated-element rounded-2xl w-full max-w-xs"
-            initial={{ scale: 0.98 }}
-            whileInView={{ scale: 1.05 }}
-            transition={{
-              type: 'spring',
-              stiffness: 300,
-              damping: 20,
-            }}
-            viewport={{ once: false, margin: '-100px' }}
+            return (
+              <motion.div
+                key={ticker}
+                className="bg-[#042B0B] p-6 shadow-lg hover:shadow-xl transition-shadow animated-element rounded-2xl w-full max-w-xs"
+                initial={{ scale: 0.98 }}
+                whileInView={{ scale: 1.05 }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 300,
+                  damping: 20,
+                }}
+                viewport={{ once: false, margin: '-100px' }}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="text-2xl font-bold text-white">
+                    {loading ? (
+                      <span className="text-sm opacity-60">Loading...</span>
+                    ) : latestESG ? (
+                      latestESG.total_score
+                    ) : (
+                      <span className="text-sm opacity-60">No data</span>
+                    )}
+                  </div>
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-4">
+                  {companyName || ticker}
+                </h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-white/70">Environmental</span>
+                    <span className="font-semibold text-white">
+                      {loading ? (
+                        'Loading...'
+                      ) : latestESG ? (
+                        latestESG.environmental_score
+                      ) : (
+                        'No data'
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/70">Social</span>
+                    <span className="font-semibold text-white">
+                      {loading ? (
+                        'Loading...'
+                      ) : latestESG ? (
+                        latestESG.social_score
+                      ) : (
+                        'No data'
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/70">Governance</span>
+                    <span className="font-semibold text-white">
+                      {loading ? (
+                        'Loading...'
+                      ) : latestESG ? (
+                        latestESG.governance_score
+                      ) : (
+                        'No data'
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        <div className="mt-16 flex justify-center">
+          <a
+            href="/dashboard"
+            className="bg-[#042B0B] hover:bg-[#064d13] text-white font-semibold py-3 px-6 rounded-xl transition-colors"
           >
-            <div className="flex items-center justify-between mb-4">
-              <div className="text-2xl font-bold text-white">
-                {loading ? (
-                  <span className="text-sm opacity-60">Loading...</span>
-                ) : latestESG ? (
-                  latestESG.total_score
-                ) : (
-                  <span className="text-sm opacity-60">No data</span>
-                )}
-              </div>
-            </div>
-            <h3 className="text-xl font-semibold text-white mb-4">
-              {companyName}
-            </h3>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-white/70">Environmental</span>
-                <span className="font-semibold text-white">
-                  {loading ? (
-                    'Loading...'
-                  ) : latestESG ? (
-                    latestESG.environmental_score
-                  ) : (
-                    'No data'
-                  )}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-white/70">Social</span>
-                <span className="font-semibold text-white">
-                  {loading ? (
-                    'Loading...'
-                  ) : latestESG ? (
-                    latestESG.social_score
-                  ) : (
-                    'No data'
-                  )}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-white/70">Governance</span>
-                <span className="font-semibold text-white">
-                  {loading ? (
-                    'Loading...'
-                  ) : latestESG ? (
-                    latestESG.governance_score
-                  ) : (
-                    'No data'
-                  )}
-                </span>
-              </div>
-            </div>
-          </motion.div>
-        );
-      })}
+            Go to Dashboard
+          </a>
+        </div>
+      </div>
     </div>
+  );
+}
 
-    <div className="mt-16 flex justify-center">
-      <a
-        href="/dashboard"
-        className="bg-[#042B0B] hover:bg-[#064d13] text-white font-semibold py-3 px-6 rounded-xl transition-colors"
-      >
-        Go to Dashboard
-      </a>
-    </div>
-  </div>
-</div>
+// Main export with Suspense boundary
+export default function CompletePage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <CompletePageContent />
+    </Suspense>
   );
 } 

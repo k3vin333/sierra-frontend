@@ -1,13 +1,14 @@
 // app/report/[companyId]/components/FinanceImpactChart.tsx
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
     LineChart,
     Line,
     XAxis,
     YAxis,
     CartesianGrid,
+    Legend
 } from "recharts";
 import {
     ChartContainer,
@@ -25,6 +26,20 @@ interface FinanceDataPoint {
     esg: number | null;
 }
 
+interface CacheItem {
+    data: FinanceDataPoint[];
+    timestamp: number;
+}
+
+// Module-level cache to store data in memory during the session
+const sessionCache: Record<string, CacheItem> = {};
+
+// Cache expiration time - 24 hours (in milliseconds)
+const CACHE_EXPIRATION = 24 * 60 * 60 * 1000;
+
+// Storage key prefix for localStorage
+const STORAGE_KEY_PREFIX = 'finance-impact-cache-';
+
 const generateMonthlyDates = (startYear: number, endYear: number): string[] => {
     const dates: string[] = [];
     for (let year = startYear; year <= endYear; year++) {
@@ -36,13 +51,70 @@ const generateMonthlyDates = (startYear: number, endYear: number): string[] => {
     return dates;
 };
 
+// A skeleton loader for the chart while data is loading
+function ChartSkeleton() {
+    return (
+        <div className="animate-pulse w-full h-[350px] bg-gray-100 rounded-md flex items-center justify-center">
+            <div className="text-gray-400">Loading financial and ESG data...</div>
+        </div>
+    );
+}
+
 export default function FinanceImpactChart({ companyId }: Props) {
     const [data, setData] = useState<FinanceDataPoint[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const hasFetched = useRef(false);
 
     useEffect(() => {
+        // Avoid multiple fetches in development mode with React strict mode
+        if (hasFetched.current) return;
+        
         const fetchFinanceAndESGData = async () => {
             setIsLoading(true);
+            hasFetched.current = true;
+            
+            const storageKey = `${STORAGE_KEY_PREFIX}${companyId}`;
+            
+            // Try to get data from session cache first
+            if (sessionCache[companyId]) {
+                console.log(`Using session cache for ${companyId} finance data`);
+                setData(sessionCache[companyId].data);
+                setIsLoading(false);
+                return;
+            }
+            
+            // Try to get data from localStorage
+            try {
+                const cachedData = localStorage.getItem(storageKey);
+                if (cachedData) {
+                    const { data: storedData, timestamp } = JSON.parse(cachedData) as CacheItem;
+                    const now = Date.now();
+                    
+                    // Check if the cache is still valid
+                    if (now - timestamp < CACHE_EXPIRATION) {
+                        console.log(`Using localStorage cache for ${companyId} finance data`);
+                        setData(storedData);
+                        
+                        // Also update session cache
+                        sessionCache[companyId] = {
+                            data: storedData,
+                            timestamp
+                        };
+                        
+                        setIsLoading(false);
+                        return;
+                    } else {
+                        console.log(`Cache for ${companyId} expired, fetching fresh data`);
+                        // Cache expired, remove it
+                        localStorage.removeItem(storageKey);
+                    }
+                }
+            } catch (err) {
+                console.error('Error reading from cache:', err);
+                // Continue with API fetch if cache read fails
+            }
+            
+            // If we get here, we need to fetch fresh data
             const months = generateMonthlyDates(2024, 2025);
             const results: FinanceDataPoint[] = [];
 
@@ -51,14 +123,18 @@ export default function FinanceImpactChart({ companyId }: Props) {
             try {
                 const esgRes = await fetch(`https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/esg/${companyId}`);
                 const esgJson = await esgRes.json();
-                esgJson.historical_ratings.forEach((entry: any) => {
-                    const date = entry.timestamp.slice(0, 7);
-                    esgMap[date] = entry.total_score;
-                });
+                
+                if (esgJson.historical_ratings && Array.isArray(esgJson.historical_ratings)) {
+                    esgJson.historical_ratings.forEach((entry: any) => {
+                        const date = entry.timestamp.slice(0, 7);
+                        esgMap[date] = entry.total_score;
+                    });
+                }
             } catch (err) {
                 console.error("Failed to fetch ESG data", err);
             }
 
+            // Fetch finance data with better error handling
             for (const month of months) {
                 let found = false;
 
@@ -86,20 +162,54 @@ export default function FinanceImpactChart({ companyId }: Props) {
                 }
             }
 
+            // Update state with the fetched data
             setData(results);
+            
+            // Store in session cache
+            sessionCache[companyId] = {
+                data: results,
+                timestamp: Date.now()
+            };
+            
+            // Store in localStorage for future visits
+            try {
+                localStorage.setItem(storageKey, JSON.stringify({
+                    data: results,
+                    timestamp: Date.now()
+                }));
+                console.log(`Cached finance data for ${companyId}`);
+            } catch (err) {
+                console.error('Error storing in cache:', err);
+                // Continue even if cache write fails
+            }
+            
             setIsLoading(false);
         };
 
         fetchFinanceAndESGData();
+        
+        // Cleanup function
+        return () => {
+            hasFetched.current = false;
+        };
     }, [companyId]);
 
     if (isLoading) {
-        return <div className="text-base font-medium">Loading financial and ESG data...</div>;
+        return <ChartSkeleton />;
     }
 
     if (!data.length) {
         return <div className="text-base font-medium">No financial and ESG data available for this company.</div>;
     }
+
+    // Format the dates to be more readable
+    const formattedData = data.map(item => ({
+        ...item,
+        date: new Date(item.date).toLocaleDateString('en-US', {
+            month: 'short',
+            year: '2-digit'
+        })
+    }));
 
     return (
         <>
@@ -107,17 +217,31 @@ export default function FinanceImpactChart({ companyId }: Props) {
                 Monthly Closing Prices & Total ESG Risk Score (2024–2025)
             </h2>
             <ChartContainer 
-                className="w-full h-full min-h-[175px]"
+                className="w-full h-full min-h-[350px]"
                 config={{
                     close: { label: "Closing Price", color: "#4caf50" },
                     esg: { label: "ESG Score", color: "#2196f3" }
                 }}
             >
-                <LineChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 0 }} accessibilityLayer>
+                <LineChart 
+                    data={formattedData} 
+                    margin={{ top: 20, right: 30, left: 5, bottom: 20 }} 
+                    accessibilityLayer
+                >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" tickFormatter={(d) => d.slice(0, 7)} />
-                    <YAxis yAxisId="left" label={{ value: "Closing Price", angle: -90, position: 'insideLeft' }} />
-                    <YAxis yAxisId="right" orientation="right" label={{ value: "ESG Score", angle: 90, position: 'insideRight' }} />
+                    <XAxis 
+                        dataKey="date" 
+                        tickMargin={10}
+                    />
+                    <YAxis 
+                        yAxisId="left" 
+                        label={{ value: "Closing Price", angle: -90, position: 'insideLeft', dx: -15 }} 
+                    />
+                    <YAxis 
+                        yAxisId="right" 
+                        orientation="right" 
+                        label={{ value: "ESG Score", angle: 90, position: 'insideRight', dx: 15 }} 
+                    />
                     <ChartTooltip 
                         content={
                             <ChartTooltipContent 
@@ -125,8 +249,29 @@ export default function FinanceImpactChart({ companyId }: Props) {
                             />
                         } 
                     />
-                    <Line yAxisId="left" type="monotone" dataKey="close" strokeWidth={2} name="Closing Price" dot />
-                    <Line yAxisId="right" type="monotone" dataKey="esg" strokeWidth={2} name="ESG Score" dot />
+                    <Legend 
+                        verticalAlign="bottom" 
+                        height={36} 
+                    />
+                    <Line 
+                        yAxisId="left" 
+                        type="monotone" 
+                        dataKey="close" 
+                        strokeWidth={2} 
+                        name="Closing Price" 
+                        dot={{ stroke: "#4caf50", strokeWidth: 2, r: 3 }}
+                        activeDot={{ r: 5 }}
+                    />
+                    <Line 
+                        yAxisId="right" 
+                        type="monotone" 
+                        dataKey="esg" 
+                        strokeWidth={2} 
+                        name="ESG Score" 
+                        stroke="#2196f3"
+                        dot={{ stroke: "#2196f3", strokeWidth: 2, r: 3 }}
+                        activeDot={{ r: 5 }}
+                    />
                 </LineChart>
             </ChartContainer>
         </>

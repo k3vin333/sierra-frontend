@@ -84,7 +84,7 @@ export default function StatCard({
       onUpdate: (v) => setAnimatedValue(v),
     });
     return () => controls.stop();
-  }, [value]);
+  }, [value, motionValue]);
 
   const dateFormatter = useCallback((date: string) => {
     const parsedDate = new Date(date);

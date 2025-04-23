@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest, { params }: { params: { query: string } }) {
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Record<string, string> }
+) {
   try {
-    const res = await fetch(`https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/search/company/${params.query}`);
+    const query = params.query;
+    const res = await fetch(`https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/search/company/${query}`);
     const data = await res.json();
 
     return NextResponse.json(data, {

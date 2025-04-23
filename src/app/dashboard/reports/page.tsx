@@ -191,6 +191,38 @@ export default function ReportsPage() {
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
   const { getTickers, saveTicker } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+
+  // Function to load all tickers
+  const loadTickers = async () => {
+    setIsLoading(true);
+    try {
+      // Get tickers from the API
+      const tickerData = await getTickers();
+      
+      // Map the tickers to portfolio items with company names
+      const portfolioPromises = tickerData.map(async (tickerItem) => {
+        const details = await fetchStockDetails(tickerItem.ticker);
+        if (details) {
+          return {
+            ...details,
+            // Convert the timestamp string to a Date
+            addedAt: new Date(tickerItem.created_at)
+          };
+        }
+        return null;
+      });
+      
+      const resolvedPortfolioItems = await Promise.all(portfolioPromises);
+      // Filter out null items and set to state
+      setPortfolioItems(resolvedPortfolioItems.filter(item => item !== null) as PortfolioItem[]);
+    } catch (error) {
+      console.error("Failed to load tickers:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Fetch stock details from API
   const fetchStockDetails = async (ticker: string): Promise<PortfolioItem | null> => {
@@ -214,43 +246,28 @@ export default function ReportsPage() {
     }
   };
 
-  // Load tickers from API
+  // Load tickers from API on component mount or when refreshTrigger changes
   useEffect(() => {
-    const loadTickers = async () => {
-      setIsLoading(true);
-      try {
-        // Get tickers from the API
-        const tickerData = await getTickers();
-        
-        // Map the tickers to portfolio items with company names
-        const portfolioPromises = tickerData.map(async (tickerItem) => {
-          const details = await fetchStockDetails(tickerItem.ticker);
-          if (details) {
-            return {
-              ...details,
-              // Convert the timestamp string to a Date
-              addedAt: new Date(tickerItem.created_at)
-            };
-          }
-          return null;
-        });
-        
-        const resolvedPortfolioItems = await Promise.all(portfolioPromises);
-        // Filter out null items and set to state
-        setPortfolioItems(resolvedPortfolioItems.filter(item => item !== null) as PortfolioItem[]);
-      } catch (error) {
-        console.error("Failed to load tickers:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
     loadTickers();
-  }, [getTickers]);
+  }, [getTickers, refreshTrigger]);
+
+  // Auto-hide notification after 3 seconds
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
 
   const handleAddTicker = async (ticker: string) => {
     // Check if ticker already exists in portfolio
     if (portfolioItems.some(item => item.ticker === ticker)) {
+      setNotification({
+        message: `${ticker} is already in your portfolio`,
+        type: 'error'
+      });
       return;
     }
 
@@ -262,15 +279,36 @@ export default function ReportsPage() {
         const result = await saveTicker(ticker);
         
         if (result.success) {
-          // Add ticker to local state for immediate UI update
-          const updatedPortfolio = [...portfolioItems, stockDetails];
-          setPortfolioItems(updatedPortfolio);
+          // Show success notification
+          setNotification({
+            message: `Added ${ticker} to your portfolio`,
+            type: 'success'
+          });
+          
+          // Refresh the entire portfolio list
+          setRefreshTrigger(prev => prev + 1);
         } else {
-          console.error("Failed to save ticker:", result.message);
+          // Only show error notification if it's actually an error
+          setNotification({
+            message: `Failed to add ${ticker}: ${result.message}`,
+            type: 'error'
+          });
         }
       } catch (error) {
-        console.error("Error saving ticker:", error);
+        setNotification({
+          message: `Error adding ${ticker}`,
+          type: 'error'
+        });
+        
+        // Use type assertion to access properties of the error object
+        const err = error as any;
+        console.error("Error saving ticker:", err?.message || "Unknown error");
       }
+    } else {
+      setNotification({
+        message: `Could not find data for ${ticker}`,
+        type: 'error'
+      });
     }
   };
 
@@ -280,6 +318,14 @@ export default function ReportsPage() {
         <DashboardSidebar />
         <div className="flex-1 p-8">
           <h1 className="text-2xl font-bold text-[#042B0B] mb-6">Import your portfolio</h1>
+          
+          {/* Notification toast */}
+          {notification && (
+            <div className={`mb-4 p-3 rounded-md ${notification.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+              {notification.message}
+            </div>
+          )}
+          
           <div className="flex w-full h-full">
             <div className="bg-white p-6 rounded-lg shadow-md w-1/2 h-1/2 mr-3">
               <OcrReader onAddTicker={handleAddTicker} />

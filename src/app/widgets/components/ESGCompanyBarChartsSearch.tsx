@@ -40,8 +40,12 @@ export default function ESGCompanyBarCharts() {
     try {
       const res = await fetch(`/api/company-search/${query}`);
       const json = await res.json();
+      
+      const tickers = Array.isArray(json.companies)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const tickers = [...new Set(json.companies.map((c: any) => c.ticker.toLowerCase()))];
+        ? [...new Set(json.companies.map((c: any) => c.ticker?.toLowerCase()))]
+        : [];
+
 
       const grouped: Record<string, ChartDataPoint[]> = {};
 

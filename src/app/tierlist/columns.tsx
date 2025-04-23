@@ -29,6 +29,22 @@ export type ESGData = {
 
 export const columns: ColumnDef<ESGData>[] = [
   {
+    id: "expander",
+    header: () => null,
+    cell: ({ row }) => {
+      return (
+        <button
+          {...{
+            onClick: row.getToggleExpandedHandler(),
+            style: { cursor: 'pointer' },
+          }}
+        >
+          {row.getIsExpanded() ? '▼' : '▶'}
+        </button>
+      )
+    },
+  },
+  {
     accessorKey: "company_name",
     header: "Company Name",
   },

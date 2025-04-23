@@ -1,41 +1,42 @@
 // src/app/api/company-search/[query]/route.ts
-import type { NextRequest } from 'next/server';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-// Dynamic-route params must be awaited in Next 15
-type Params = { query: string };
+// Update the type definition to match Next.js App Router expectations
+// NextJS 15.2.5 requires a specific format for route params
+type Params = {
+  query: string;
+};
 
+// Use environment variable for API key - ensure it's consistent with the frontend approach
 const getFinnhubApiKey = () => {
-  if (process.env.FINNHUB_API_KEY) return process.env.FINNHUB_API_KEY;
+  // Server components should use process.env directly (not NEXT_PUBLIC)
+  if (process.env.FINNHUB_API_KEY) {
+    return process.env.FINNHUB_API_KEY;
+  }
+  
+  // For development - warning message but use a placeholder
   console.warn('FINNHUB_API_KEY environment variable is not set');
   return '';
 };
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<Params> }
+  { params }: { params: Params }
 ) {
-  const { query } = await params;
-
-  const apiKey = getFinnhubApiKey();
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: 'API key is not configured' },
-      { status: 500 }
-    );
-  }
-
+  const query = params.query;
+  
   try {
-    const res = await fetch(
-      `https://finnhub.io/api/v1/search?q=${encodeURIComponent(query)}&token=${apiKey}`
-    );
-
-    if (!res.ok) throw new Error(`Finnhub API responded with ${res.status}`);
-
-    const data = await res.json();
+    // Use the ESG API's company search endpoint instead of Finnhub
+    const response = await fetch(`https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/search/company/${encodeURIComponent(query)}`);
+    
+    if (!response.ok) {
+      throw new Error(`ESG API responded with status: ${response.status}`);
+    }
+    
+    const data = await response.json();
     return NextResponse.json(data);
-  } catch (err) {
-    console.error('Company search error:', err);
+  } catch (error) {
+    console.error('Company search error:', error);
     return NextResponse.json(
       { error: 'Failed to fetch company search results' },
       { status: 500 }

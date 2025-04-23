@@ -170,6 +170,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return [];
     }
   };
+
+  // mock ticker list
+  /*const getTickers = async (): Promise<TickerData[]> => {
+    return [
+      { ticker: "aapl", created_at: "2024-01-01T00:00:00Z" },
+      { ticker: "msft", created_at: "2024-01-02T00:00:00Z" },
+      { ticker: "dis", created_at: "2024-01-03T00:00:00Z" },
+      { ticker: "googl", created_at: "2024-01-04T00:00:00Z" },
+    ];
+  };*/
+  
+  
   
   // Initialize from localStorage if available
   // This is used to check if the user is logged in when the page is loaded

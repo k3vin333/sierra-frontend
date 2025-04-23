@@ -73,7 +73,6 @@ export default function CompanyESGChart({ selectedTicker }: CompanyESGChartProps
         }))
 
         setChartData(transformed.reverse())
-       
       } catch (err) {
         console.log(err);
         setError("Error fetching data. Please try again.")

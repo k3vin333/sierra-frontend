@@ -133,7 +133,6 @@ const OcrReader = ({ onAddTicker }: { onAddTicker: (ticker: string) => void }) =
       const {
         data: { text },
       } = await worker.recognize(selectedImage);
-      
       // Extract tickers from the OCR result
       // Note: extractTickers returns all potential tickers and also updates validatedTickers state
       // with those that pass the Finnhub API validation
@@ -236,6 +235,7 @@ export default function ReportsPage() {
     }
   };
 
+
   // Fetch stock details from API
   const fetchStockDetails = async (ticker: string): Promise<PortfolioItem | null> => {
     try {
@@ -281,6 +281,7 @@ export default function ReportsPage() {
         message: `${ticker} is already in your portfolio`,
         type: 'error'
       });
+
       return;
     }
 
@@ -331,7 +332,6 @@ export default function ReportsPage() {
         <DashboardSidebar />
         <div className="flex-1 p-8">
           <h1 className="text-2xl font-bold text-[#042B0B] mb-6">Import your portfolio</h1>
-          
           {/* Notification toast */}
           {notification && (
             <div className={`mb-4 p-3 rounded-md ${notification.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>

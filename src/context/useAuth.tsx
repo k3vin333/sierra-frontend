@@ -182,7 +182,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return [];
     }
   };
-
   // mock ticker list
   /*const getTickers = async (): Promise<TickerData[]> => {
     return [

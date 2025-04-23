@@ -11,19 +11,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/useAuth';
 
-// Use environment variable if available, otherwise use a placeholder
-// In production, this should be properly configured in your deployment environment
-const getFinnhubApiKey = () => {
-  // For client-side code, use NEXT_PUBLIC_ prefix for environment variables
-  if (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_FINNHUB_API_KEY) {
-    return process.env.NEXT_PUBLIC_FINNHUB_API_KEY;
-  }
-  
-  // Fallback for development or if env variable is not set
-  // In production, ensure the environment variable is properly set
-  return 'placeholder_api_key_for_development';
-};
-
 // Define a type for portfolio items
 type PortfolioItem = {
   id: string;
@@ -95,7 +82,6 @@ const OcrReader = ({ onAddTicker }: { onAddTicker: (ticker: string) => void }) =
       // Scan the entire line for potential tickers
       const words = line.trim().split(/\s+/).filter(word => word.length > 0);
       if (words.length > 0) {
-        // Remove trailing single dot or triple dots from the first word to clean up potential ticker symbols
         // Check if it matches ticker format
         if (tickerRegex.test(words[0])) {
           tickers.push(words[0]);
@@ -103,19 +89,8 @@ const OcrReader = ({ onAddTicker }: { onAddTicker: (ticker: string) => void }) =
       }
     }
 
-    // Now for final check, we use FINNHUB api to see if a ticker returns
-    // a valid body which isnt an error, and push to tickersAreValid
-    const apiKey = getFinnhubApiKey();
-    const tickersAreValid: string[] = [];
-    for (const ticker of tickers) {
-      const res = await fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${apiKey}`);
-      const data = await res.json();
-      // Check if response is not an error and has valid data
-      if (data && !data.error && Object.keys(data).length > 0) {
-        tickersAreValid.push(ticker);
-      }
-    }
-    setValidatedTickers(tickersAreValid);
+    // Set all extracted tickers as validated
+    setValidatedTickers(tickers);
     
     return tickers;
   };
@@ -239,18 +214,33 @@ export default function ReportsPage() {
   // Fetch stock details from API
   const fetchStockDetails = async (ticker: string): Promise<PortfolioItem | null> => {
     try {
-      const apiKey = getFinnhubApiKey();
-      const res = await fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${apiKey}`);
-      const companyData = await res.json();
+      // Use our ESG API to get company details instead of Finnhub
+      const res = await fetch(`https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/esg/${ticker}`);
+      const data = await res.json();
       
-      if (!companyData.name) {
+      // Check if we have valid data with company_name
+      if (!data || !data.company_name) {
+        // Try the search endpoint as fallback
+        const searchRes = await fetch(`https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/search/company/${ticker}`);
+        const searchData = await searchRes.json();
+        
+        if (searchData.companies && searchData.companies.length > 0) {
+          const company = searchData.companies[0];
+          return {
+            id: crypto.randomUUID(),
+            ticker: ticker,
+            name: company.company_name,
+            addedAt: new Date()
+          };
+        }
+        
         return null;
       }
       
       return {
         id: crypto.randomUUID(),
         ticker: ticker,
-        name: companyData.name,
+        name: data.company_name,
         addedAt: new Date()
       };
     } catch (error) {

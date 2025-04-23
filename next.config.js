@@ -5,7 +5,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: ['logo.clearbit.com'],
+    domains: ['logo.clearbit.com', 'img.logo.dev'],
     remotePatterns: [
       {
         protocol: 'https',

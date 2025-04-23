@@ -17,6 +17,25 @@ type ESGData = {
   }[];
 };
 
+// Fallback logo component that displays company initials when image fails to load
+const LogoFallback = ({ name }: { name: string }) => {
+  // Get the initials from the company name
+  const initials = name
+    .split(' ')
+    .map(word => word[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+    
+  return (
+    <div className="h-full w-full flex items-center justify-start">
+      <div className="bg-white/10 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
+        {initials}
+      </div>
+    </div>
+  );
+};
+
 const CompanyCards = () => {
   const companies = [
     {
@@ -43,6 +62,7 @@ const CompanyCards = () => {
 
   const [esgData, setEsgData] = useState<Record<string, ESGData | null>>({});
   const [loading, setLoading] = useState(true);
+  const [logoErrors, setLogoErrors] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const fetchESGData = async () => {
@@ -97,6 +117,12 @@ const CompanyCards = () => {
     return sortedRatings[0];
   };
 
+  // Handle image load error
+  const handleImageError = (domain: string) => {
+    console.log(`Failed to load logo for ${domain}`);
+    setLogoErrors(prev => ({ ...prev, [domain]: true }));
+  };
+
   return (
     <div className="w-full bg-[#F7EFE6] py-20 min-h-[65vh]">
       <div className="mx-auto max-w-7xl px-4">
@@ -109,6 +135,7 @@ const CompanyCards = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {companies.map((company) => {
             const latestESG = getLatestESGData(company.ticker);
+            const hasLogoError = logoErrors[company.domain] || false;
 
             return (
                 <motion.div
@@ -126,13 +153,19 @@ const CompanyCards = () => {
 
                   <div className="flex items-center justify-between mb-4">
                     <div className="relative h-10 w-24">
-                      <Image
-                        src={getLogoUrl(company.domain)}
-                        alt={`${company.name} logo`}
-                        fill
-                        style={{ objectFit: 'contain', objectPosition: 'left' }}
-                        sizes="(max-width: 768px) 100px, 150px"
-                      />
+                      {hasLogoError ? (
+                        <LogoFallback name={company.name} />
+                      ) : (
+                        <Image
+                          src={getLogoUrl(company.domain)}
+                          alt={`${company.name} logo`}
+                          fill
+                          style={{ objectFit: 'contain', objectPosition: 'left' }}
+                          sizes="(max-width: 768px) 100px, 150px"
+                          onError={() => handleImageError(company.domain)}
+                          unoptimized={true} // Skip the image optimization process
+                        />
+                      )}
                     </div>
                     <div className="text-2xl font-bold text-white">
                       {loading ? (

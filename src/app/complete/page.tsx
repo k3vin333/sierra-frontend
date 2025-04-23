@@ -42,8 +42,8 @@ export default function CompletePage() {
 
   const searchParams = useSearchParams();
 
-  const answer2 = searchParams.get('2');
-  const answer3 = searchParams.get('3');
+  const answer2 = searchParams?.get('2') ?? '';
+  const answer3 = searchParams?.get('3') ?? '';
 
   const recommendedTickers = useMemo(() => {
     const key2 = answer2 ? `2_${answer2}` : '';

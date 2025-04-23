@@ -59,6 +59,7 @@ export default function CompanyESGChart() {
         setChartData(transformed.reverse())
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
+        console.log(err);
         setError("Error fetching data. Please try again.")
         setChartData([])
       }

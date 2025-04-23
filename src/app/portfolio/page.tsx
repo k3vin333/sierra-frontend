@@ -129,6 +129,7 @@ export default function PortfolioPage() {
                                     : tickers.length === 0 
                                         ? "Loading your portfolio..." 
                                         : `Loading data for ${Object.entries(tickersLoaded).filter(([, isLoaded]) => isLoaded).length} of ${tickers.length} companies...`
+
                                 }
                             </p>
                         </div>

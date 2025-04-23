@@ -120,6 +120,7 @@ export default function FinanceImpactChart({ companyId }: Props) {
 
             // Fetch ESG data once
             const esgMap: Record<string, number> = {};
+
             try {
                 const esgRes = await fetch(`https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/esg/${companyId}`);
                 const esgJson = await esgRes.json();

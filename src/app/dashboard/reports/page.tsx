@@ -56,18 +56,14 @@ const DataTable = ({ portfolioItems }: { portfolioItems: PortfolioItem[] }) => {
 // Move OcrReader outside the ReportsPage component
 const OcrReader = ({ onAddTicker }: { onAddTicker: (ticker: string) => void }) => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [ocrResult, setOcrResult] = useState<string>('');
   const [ocrStatus, setOcrStatus] = useState<string>('');
-  const [extractedTickers, setExtractedTickers] = useState<string[]>([]);
   const [validatedTickers, setValidatedTickers] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       setSelectedImage(event.target.files[0]);
-      setOcrResult(''); // Reset OCR result
-      setOcrStatus(''); // Reset status
-      setExtractedTickers([]);
+      setOcrStatus('');
       setValidatedTickers([]);
     }
   };
@@ -125,12 +121,13 @@ const OcrReader = ({ onAddTicker }: { onAddTicker: (ticker: string) => void }) =
       const {
         data: { text },
       } = await worker.recognize(selectedImage);
-
-      setOcrResult(text);
       
       // Extract tickers from the OCR result
-      const tickers = extractTickers(text);
-      setExtractedTickers(await tickers);
+      // Note: extractTickers returns all potential tickers and also updates validatedTickers state
+      // with those that pass the Finnhub API validation
+      const extractedTickers = await extractTickers(text);
+      console.log('All extracted tickers:', extractedTickers);
+      // The UI will automatically update with validated tickers via state
       
       setOcrStatus('Completed');
     } catch (error) {

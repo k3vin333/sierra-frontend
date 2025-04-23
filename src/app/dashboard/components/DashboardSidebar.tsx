@@ -36,7 +36,7 @@ const menuItems = [
   },
   {
     label: 'Reports',
-    href: '/reports',
+    href: '/dashboard/reports',
     icon: FileTextIcon
   },
   {
@@ -62,8 +62,9 @@ function DashboardSidebar() {
   }
 
   return (
-      <SidebarProvider>
-        <Sidebar className="border-r border-[#042B0B] bg-[#042B0B] text-[#F7EFE6]">
+    <div className="flex-none">
+      <SidebarProvider className="!w-auto flex-none">
+        <Sidebar className="border-r border-[#042B0B] bg-[#042B0B] text-[#F7EFE6] w-64 flex-none">
           <SidebarContent className="p-0 bg-[#042B0B] text-[#F7EFE6]">
             <SidebarGroup className="p-0 bg-[#042B0B]">
               <SidebarGroupLabel className="text-[#F7EFE6] text-2xl font-bold mt-4 mb-4 px-4">
@@ -107,6 +108,7 @@ function DashboardSidebar() {
           </SidebarFooter>
         </Sidebar>
       </SidebarProvider>
+    </div>
   )
 }
 

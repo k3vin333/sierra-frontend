@@ -9,12 +9,12 @@ import ESGLevelChart from "@/app/report/[companyId]/components/ESGLevelChart";
 import FinanceImpactChart from "@/app/report/[companyId]/components/FinanceImpactChart";
 import ESGPrediction from "@/app/report/[companyId]/components/ESGPrediction";
 
-export default function ReportCharts({ companyId }: { companyId: string }) {
+export default function ReportCharts({ companyId, onLoad }: { companyId: string; onLoad?: () => void }) {
     const [tabIndex, setTabIndex] = useState(0);
 
     return (
         <Box sx={{ p: 4 }}>
-            <ESGPrediction companyId={companyId} />
+            <ESGPrediction companyId={companyId} onLoad={onLoad} />
             <Typography variant="h4" gutterBottom>
                 ESG Report for {companyId.toUpperCase()}
             </Typography>

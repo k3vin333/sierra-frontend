@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { BarChart, Bar, CartesianGrid, XAxis } from 'recharts';
 import { ChevronUp, TrendingUp } from 'lucide-react';
 
@@ -32,26 +32,53 @@ export default function ESGCompanyBarCharts() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isExpanded, setIsExpanded] = useState(true);
   const contentRef = useRef<HTMLDivElement>(null);
+  const [contentHeight, setContentHeight] = useState<string>('2000px');
+  const [isLoading, setIsLoading] = useState(false);
 
   const [page, setPage] = useState(0);
   const pageSize = 5;
 
+  // Force update content height when data changes
+  useEffect(() => {
+    // Wait for the DOM to update with the new data
+    const timer = setTimeout(() => {
+      if (contentRef.current && isExpanded) {
+        const height = contentRef.current.scrollHeight;
+        setContentHeight(`${height}px`);
+        console.log('Updated content height to', height);
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [groupedData, isExpanded, page]);
+
   const fetchCompanies = async (query: string) => {
     try {
+      setIsLoading(true);
+      console.log('Fetching companies with query:', query);
       const res = await fetch(`/api/company-search/${query}`);
+      console.log('Response status:', res.status);
       const json = await res.json();
+      console.log('API response:', json);
       
-      const tickers = Array.isArray(json.companies)
+      if (!json || !json.companies) {
+        console.error('Invalid API response structure:', json);
+        setGroupedData({});
+        setIsLoading(false);
+        return;
+      }
+      
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ? [...new Set(json.companies.map((c: any) => c.ticker?.toLowerCase()))]
-        : [];
-
+      const tickers = [...new Set(json.companies.map((c: any) => c.ticker.toLowerCase()))];
+      console.log('Extracted tickers:', tickers);
 
       const grouped: Record<string, ChartDataPoint[]> = {};
 
       for (const ticker of tickers) {
+        console.log('Fetching ESG data for ticker:', ticker);
         const historyRes = await fetch(`/api/esg?ticker=${ticker}`);
         const data = await historyRes.json();
+        console.log('ESG data for ticker:', ticker, data);
 
         if (data?.historical_ratings?.length) {
           const key = `${data.historical_ratings[0].company_name}::${data.ticker.toUpperCase()}`;
@@ -79,10 +106,24 @@ export default function ESGCompanyBarCharts() {
         }
       }
 
+      console.log('Final grouped data:', grouped);
       setPage(0);
       setGroupedData(grouped);
+      
+      // Force re-computation of height after state updates
+      setTimeout(() => {
+        if (contentRef.current) {
+          const newHeight = contentRef.current.scrollHeight;
+          setContentHeight(`${newHeight}px`);
+          console.log('Forced update of content height to', newHeight);
+        }
+      }, 200);
+      
     } catch (error) {
       console.error('Failed to search companies', error);
+      setGroupedData({});
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -92,7 +133,21 @@ export default function ESGCompanyBarCharts() {
     }
   };
 
-  const toggleSection = () => setIsExpanded((prev) => !prev);
+  const toggleSection = () => {
+    setIsExpanded((prev) => {
+      const newState = !prev;
+      // If we're expanding, we need to make sure the height is updated
+      if (newState && contentRef.current) {
+        setTimeout(() => {
+          if (contentRef.current) {
+            const newHeight = contentRef.current.scrollHeight;
+            setContentHeight(`${newHeight}px`);
+          }
+        }, 10);
+      }
+      return newState;
+    });
+  };
 
   const allCompanies = Object.entries(groupedData);
   const totalPages = Math.ceil(allCompanies.length / pageSize);
@@ -119,7 +174,7 @@ export default function ESGCompanyBarCharts() {
         ref={contentRef}
         className="transition-all duration-700 ease-out"
         style={{
-          maxHeight: isExpanded ? contentRef.current?.scrollHeight + 'px' || '2000px' : '0',
+          maxHeight: isExpanded ? contentHeight : '0',
           opacity: isExpanded ? 1 : 0,
           overflow: 'hidden',
           transitionTimingFunction: 'cubic-bezier(0.33, 1, 0.68, 1)',
@@ -135,11 +190,27 @@ export default function ESGCompanyBarCharts() {
               className="max-w-sm"
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
-            <Button onClick={handleSearch}>Search</Button>
+            <Button onClick={handleSearch} disabled={isLoading}>
+              {isLoading ? 'Searching...' : 'Search'}
+            </Button>
           </div>
 
+          {/* Loading State */}
+          {isLoading && (
+            <div className="flex justify-center items-center py-8">
+              <div className="animate-pulse text-gray-600">Loading data...</div>
+            </div>
+          )}
+
+          {/* No Results State */}
+          {!isLoading && allCompanies.length === 0 && searchQuery.trim() !== '' && (
+            <div className="text-center py-8 text-gray-500">
+              No ESG data found for "{searchQuery}". Try another company.
+            </div>
+          )}
+
           {/* Company Charts */}
-          {currentSlice.map(([key, chartData]) => {
+          {!isLoading && currentSlice.map(([key, chartData]) => {
             const [companyName, ticker] = key.split('::');
 
             return (

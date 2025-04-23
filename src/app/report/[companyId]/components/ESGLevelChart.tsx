@@ -1,18 +1,25 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import Typography from "@mui/material/Typography";
-import Tooltip from "@mui/material/Tooltip";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
     LineChart,
     Line,
     XAxis,
     YAxis,
     CartesianGrid,
-    ResponsiveContainer,
-    Tooltip as RechartsTooltip,
 } from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 
 interface Props {
     companyId: string;
@@ -34,9 +41,11 @@ const ratingScale: Record<string, number> = {
 
 export default function ESGLevelChart({ companyId }: Props) {
     const [data, setData] = useState<RatingData[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
+            setIsLoading(true);
             try {
                 const res = await fetch(
                     `https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/esg/${companyId}`
@@ -52,37 +61,48 @@ export default function ESGLevelChart({ companyId }: Props) {
                 setData(formatted);
             } catch (err) {
                 console.error("Failed to fetch ESG rating data", err);
+            } finally {
+                setIsLoading(false);
             }
         };
 
         fetchData();
     }, [companyId]);
 
+    if (isLoading) {
+        return <div className="text-base font-medium">Loading ESG Level Chart...</div>;
+    }
+
     if (!data.length) {
-        return <Typography>Loading ESG Level Chart...</Typography>;
+        return <div className="text-base font-medium">No ESG rating data available for this company.</div>;
     }
 
     return (
         <>
-            <Typography variant="h6" gutterBottom>
-                ESG Rating Over Time
-                <Tooltip title="ESG ratings range from A (best performance) to E (worst performance), reflecting overall ESG risk level."
-                    placement="right"
-                    componentsProps={{
-                        tooltip: {
-                            sx: {
-                                fontSize: '0.9rem',
-                                maxWidth: 300,
-                                padding: 1.5,
-                            },
-                        },
-                    }}
-                >
-                    <InfoOutlinedIcon sx={{ ml: 1, fontSize: 20, verticalAlign: 'middle', cursor: 'pointer' }} />
-                </Tooltip>
-            </Typography>
-            <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+            <div className="flex items-center mb-4">
+                <h2 className="text-xl font-semibold">
+                    ESG Rating Over Time
+                </h2>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <button className="ml-2">
+                                <Info className="h-4 w-4 text-gray-500 cursor-pointer" />
+                            </button>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs p-4 text-sm">
+                            ESG ratings range from A (best performance) to E (worst performance), reflecting overall ESG risk level.
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+            </div>
+            <ChartContainer 
+                className="w-full h-full max-h-[350px]"
+                config={{
+                    numeric_rating: { label: 'ESG Rating', color: '#ff9800' }
+                }}
+            >
+                <LineChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 0 }} accessibilityLayer>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="timestamp" />
                     <YAxis
@@ -94,13 +114,17 @@ export default function ESGLevelChart({ companyId }: Props) {
                             return label ? label[0] : value;
                         }}
                     />
-                    <RechartsTooltip
-                        formatter={(_: any, __: any, props: any) => `Rating: ${props.payload.rating}`}
-                        labelFormatter={(label) => `Date: ${label}`}
+                    <ChartTooltip
+                        content={
+                            <ChartTooltipContent 
+                                formatter={(_: any, __: any, props: any) => `Rating: ${props.payload.rating}`}
+                                labelFormatter={(label) => `Date: ${label}`}
+                            />
+                        }
                     />
-                    <Line type="monotone" dataKey="numeric_rating" stroke="#ff9800" strokeWidth={2} name="Rating" dot />
+                    <Line type="monotone" dataKey="numeric_rating" strokeWidth={2} name="Rating" dot />
                 </LineChart>
-            </ResponsiveContainer>
+            </ChartContainer>
         </>
     );
 }

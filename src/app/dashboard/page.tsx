@@ -51,8 +51,8 @@ export default function DashboardPage() {
 
     // Fetch ESG score data from API
     // This is for the stat card.
-    const [ticker, setTicker] = useState("DIS");
-    const [inputValue, setInputValue] = useState("DIS");
+    const [ticker, setTicker] = useState("");
+    const [inputValue, setInputValue] = useState("");
 
     // Fetch ESG data based on ticker
     useEffect(() => {
@@ -181,7 +181,8 @@ export default function DashboardPage() {
                     <StatCard 
                       title="Environmental"
                       value={environmentalScore.value}
-                      suffix="%"
+                      suffix=" "
+
                       icon={<BarChart3 className="h-5 w-5" />}
                       chartData={environmentalScore.chartData}
                       chartColor="#047857"
@@ -194,7 +195,8 @@ export default function DashboardPage() {
                     <StatCard 
                       title="Social"
                       value={socialScore.value}
-                      suffix="%"
+                      suffix=" "
+
                       icon={<TrendingUp className="h-5 w-5" />}
                       chartData={socialScore.chartData}
                       chartColor="#10b981"
@@ -207,7 +209,7 @@ export default function DashboardPage() {
                     <StatCard 
                       title="Governance"
                       value={governanceScore.value}
-                      suffix="%"
+                      suffix=" "
                       icon={<LineChart className="h-5 w-5" />}
                       chartData={governanceScore.chartData}
                       chartColor="#65a30d"

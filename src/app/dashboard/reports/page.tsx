@@ -275,7 +275,7 @@ export default function ReportsPage() {
   };
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute delayRender={true}>
       <div className="min-h-screen flex bg-[#F7EFE6]">
         <DashboardSidebar />
         <div className="flex-1 p-8">

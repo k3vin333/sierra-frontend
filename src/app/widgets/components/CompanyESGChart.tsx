@@ -26,17 +26,32 @@ type ESGRecord = {
   governance_score: number
 }
 
-export default function CompanyESGChart() {
+interface CompanyESGChartProps {
+  selectedTicker?: string;
+}
+
+export default function CompanyESGChart({ selectedTicker }: CompanyESGChartProps) {
   const [ticker, setTicker] = useState("")
   const [inputValue, setInputValue] = useState("")
    
   const [chartData, setChartData] = useState<any[]>([])
   const [error, setError] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Initialize with selectedTicker if provided
+  useEffect(() => {
+    if (selectedTicker) {
+      setTicker(selectedTicker);
+      setInputValue(selectedTicker);
+    }
+  }, [selectedTicker]);
 
   useEffect(() => {
     if (!ticker) return;
+    
     async function fetchData() {
       setError("")
+      setIsLoading(true)
       try {
         const res = await fetch(`/api/esg?ticker=${ticker}`)
         const data = await res.json()
@@ -63,6 +78,8 @@ export default function CompanyESGChart() {
         console.log(err);
         setError("Error fetching data. Please try again.")
         setChartData([])
+      } finally {
+        setIsLoading(false)
       }
     }
 
@@ -95,9 +112,23 @@ export default function CompanyESGChart() {
               placeholder="e.g. AAPL"
               className="w-full sm:w-32"
             />
-            <Button onClick={handleSearch} variant="outline" size="sm">
-              <Search className="w-4 h-4 mr-1" />
-              Search
+            <Button 
+              onClick={handleSearch} 
+              variant="outline" 
+              size="sm"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <div className="animate-spin h-4 w-4 mr-1 border-2 border-t-transparent border-current rounded-full"></div>
+                  Loading
+                </>
+              ) : (
+                <>
+                  <Search className="w-4 h-4 mr-1" />
+                  Search
+                </>
+              )}
             </Button>
           </div>
         </div>
@@ -106,6 +137,11 @@ export default function CompanyESGChart() {
       <CardContent>
         {error ? (
           <p className="text-sm text-red-500">{error}</p>
+        ) : isLoading ? (
+          <div className="flex items-center justify-center h-[300px]">
+            <div className="animate-spin h-8 w-8 mr-2 border-4 border-t-transparent border-[#047857] rounded-full"></div>
+            <span>Loading chart data...</span>
+          </div>
         ) : (
           <ChartContainer
             config={{
@@ -168,7 +204,7 @@ export default function CompanyESGChart() {
         <div className="flex w-full items-start gap-2 text-sm">
           <div className="grid gap-1">
             <div className="flex items-center gap-2 font-medium leading-none">
-              Stable ESG performance <TrendingUp className="h-4 w-4" />
+              {ticker ? `${ticker} ESG Performance` : 'Stable ESG performance'} <TrendingUp className="h-4 w-4" />
             </div>
             <div className="text-muted-foreground">Historical data since 2020</div>
           </div>

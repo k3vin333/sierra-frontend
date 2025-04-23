@@ -1,35 +1,22 @@
-// src/app/api/company-search/route.ts
+// src/app/api/company-search/[query]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { query: string } }
-) {
-  try {
-    console.log('API route called with params:', params);
-    // Safely access the query param
-    const query = params.query;
-    
-    if (!query) {
-      return NextResponse.json({ error: 'Query parameter required' }, { status: 400 });
-    }
+export async function GET(request: NextRequest, { params }: { params: { query: string } }) {
+  const query = params.query;
 
-    console.log('Fetching from backend with query:', query);
+  if (!query) {
+    return NextResponse.json({ error: 'Query parameter required' }, { status: 400 });
+  }
+
+  try {
     const res = await fetch(
       `https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/search/company/${query}`
     );
-    
-    if (!res.ok) {
-      console.error(`Backend API error: ${res.status} ${res.statusText}`);
-      return NextResponse.json({ error: 'Backend API error' }, { status: res.status });
-    }
-    
     const data = await res.json();
-    console.log('Backend API response:', data);
 
     return NextResponse.json(data, {
       headers: {
-        'Cache-Control': 'no-store',
+       'Cache-Control': 'no-store',
       },
     });
   } catch (error) {

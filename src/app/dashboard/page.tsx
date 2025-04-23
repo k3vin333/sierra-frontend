@@ -6,7 +6,7 @@ import DashboardSidebar from './components/DashboardSidebar';
 import CompanyRatingWidget from '../widgets/components/LevelACompaniesWidget';
 import ESGCompanyBarChartsSearch from '../widgets/components/ESGCompanyBarChartsSearch';
 import CompanyESGChart from '../widgets/components/CompanyESGChart';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronUp } from 'lucide-react';
 import AllCompaniesESGChart from '../widgets/components/AllCompaniesESGChart';
 
 export default function DashboardPage() {

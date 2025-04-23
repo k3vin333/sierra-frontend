@@ -29,6 +29,7 @@ type ESGRecord = {
 export default function CompanyESGChart() {
   const [ticker, setTicker] = useState("DIS")
   const [inputValue, setInputValue] = useState("DIS")
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [chartData, setChartData] = useState<any[]>([])
   const [error, setError] = useState("")
 
@@ -56,6 +57,7 @@ export default function CompanyESGChart() {
         }))
 
         setChartData(transformed.reverse())
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
         setError("Error fetching data. Please try again.")
         setChartData([])

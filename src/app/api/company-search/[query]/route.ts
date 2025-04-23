@@ -10,6 +10,7 @@ export async function GET(_: NextRequest, { params }: { params: { query: string 
         'Cache-Control': 'no-store',
       },
     });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch companies' }, { status: 500 });
   }

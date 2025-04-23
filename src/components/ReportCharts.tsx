@@ -1,7 +1,7 @@
 // src/components/ReportCharts.tsx
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Box, Typography, Tabs, Tab, Paper } from "@mui/material";
 import ESGTrendChart from "@/app/report/[companyId]/components/ESGTrendChart";
 import ESGFactorsChart from "@/app/report/[companyId]/components/ESGFactorsChart";
@@ -9,29 +9,12 @@ import ESGLevelChart from "@/app/report/[companyId]/components/ESGLevelChart";
 import FinanceImpactChart from "@/app/report/[companyId]/components/FinanceImpactChart";
 import ESGPrediction from "@/app/report/[companyId]/components/ESGPrediction";
 
-interface ReportChartsProps {
-    companyId: string;
-    onLoad?: () => void;
-}
-
-export default function ReportCharts({ companyId, onLoad }: ReportChartsProps) {
+export default function ReportCharts({ companyId, onLoad }: { companyId: string; onLoad?: () => void }) {
     const [tabIndex, setTabIndex] = useState(0);
-    const [dataLoaded, setDataLoaded] = useState(false);
-
-    // Report that data is loaded after initial render
-    useEffect(() => {
-        // Simulate a loading delay to ensure data is fetched
-        const timer = setTimeout(() => {
-            setDataLoaded(true);
-            onLoad?.();
-        }, 1000);
-        
-        return () => clearTimeout(timer);
-    }, [companyId, onLoad]);
 
     return (
         <Box sx={{ p: 4 }}>
-            <ESGPrediction companyId={companyId} />
+            <ESGPrediction companyId={companyId} onLoad={onLoad} />
             <Typography variant="h4" gutterBottom>
                 ESG Report for {companyId.toUpperCase()}
             </Typography>

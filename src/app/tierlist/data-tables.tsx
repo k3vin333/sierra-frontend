@@ -103,7 +103,7 @@ export function DataTable<TData extends { ticker: string }, TValue>({
                   <TableRow
                     data-state={row.getIsSelected() && "selected"}
                     onClick={() => row.toggleExpanded()}
-                    className="cursor-pointer hover:bg-gray-50"
+                    className="cursor-pointer hover:bg-[#F7EFE6]"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
@@ -115,7 +115,7 @@ export function DataTable<TData extends { ticker: string }, TValue>({
                   {isExpanded && (
                     <TableRow>
                       <TableCell colSpan={columns.length} className="p-0">
-                        <div className="p-4 bg-gray-50">
+                        <div className="p-4 bg-[#F7EFE6]">
                           <h3 className="text-lg font-semibold mb-4">
                             ESG History for {ticker.toUpperCase()}
                           </h3>

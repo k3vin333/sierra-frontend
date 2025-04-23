@@ -27,13 +27,14 @@ type ESGRecord = {
 }
 
 export default function CompanyESGChart() {
-  const [ticker, setTicker] = useState("DIS")
-  const [inputValue, setInputValue] = useState("DIS")
+  const [ticker, setTicker] = useState("")
+  const [inputValue, setInputValue] = useState("")
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [chartData, setChartData] = useState<any[]>([])
   const [error, setError] = useState("")
 
   useEffect(() => {
+    if (!ticker) return;
     async function fetchData() {
       setError("")
       try {

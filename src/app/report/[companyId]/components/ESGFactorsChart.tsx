@@ -8,6 +8,7 @@ import {
     XAxis, 
     YAxis, 
     CartesianGrid, 
+    Legend
 } from "recharts";
 import {
     ChartContainer,
@@ -25,6 +26,22 @@ interface ESGFactorData {
     social_score: number;
     governance_score: number;
 }
+
+// Green color palette for ESG metrics
+const ESG_COLORS = {
+    environmental: {
+        stroke: "#047857", // Dark green
+        fill: "#bbf7d0"    // Light green
+    },
+    social: {
+        stroke: "#10b981", // Medium green
+        fill: "#6ee7b7"    // Medium light green
+    },
+    governance: {
+        stroke: "#65a30d", // Olive green
+        fill: "#d9f99d"    // Light olive green
+    }
+};
 
 export default function ESGFactorsChart({ companyId }: Props) {
     const [data, setData] = useState<ESGFactorData[]>([]);
@@ -68,6 +85,15 @@ export default function ESGFactorsChart({ companyId }: Props) {
         return <div className="text-base font-medium">No ESG factor data available for this company.</div>;
     }
 
+    // Format dates for better readability
+    const formattedData = data.map(entry => ({
+        ...entry,
+        timestamp: new Date(entry.timestamp).toLocaleDateString("en-US", {
+            month: "short",
+            year: "2-digit"
+        })
+    }));
+
     return (
         <>
             <h2 className="text-xl font-semibold mb-4">
@@ -76,21 +102,57 @@ export default function ESGFactorsChart({ companyId }: Props) {
             <ChartContainer 
                 className="w-full h-full max-h-[350px]"
                 config={{
-                    environmental_score: { label: 'Environmental', color: '#66bb6a' },
-                    social_score: { label: 'Social', color: '#42a5f5' },
-                    governance_score: { label: 'Governance', color: '#ef5350' }
+                    environmental_score: { label: 'Environmental', color: ESG_COLORS.environmental.stroke },
+                    social_score: { label: 'Social', color: ESG_COLORS.social.stroke },
+                    governance_score: { label: 'Governance', color: ESG_COLORS.governance.stroke }
                 }}
             >
-                <LineChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 0 }} accessibilityLayer>
+                <LineChart 
+                    data={formattedData} 
+                    margin={{ top: 20, right: 30, left: 0, bottom: 20 }} 
+                    accessibilityLayer
+                >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="timestamp" />
+                    <XAxis 
+                        dataKey="timestamp" 
+                        tickMargin={10} 
+                    />
                     <YAxis />
                     <ChartTooltip
-                        content={<ChartTooltipContent />}
+                        content={<ChartTooltipContent indicator="line" />}
                     />
-                    <Line type="monotone" dataKey="environmental_score" strokeWidth={2} name="Environmental" />
-                    <Line type="monotone" dataKey="social_score" strokeWidth={2} name="Social" />
-                    <Line type="monotone" dataKey="governance_score" strokeWidth={2} name="Governance" />
+                    <Legend 
+                        verticalAlign="bottom" 
+                        height={36} 
+                        iconType="circle" 
+                    />
+                    <Line 
+                        type="monotone" 
+                        dataKey="environmental_score" 
+                        strokeWidth={2} 
+                        name="Environmental" 
+                        stroke={ESG_COLORS.environmental.stroke}
+                        dot={{ stroke: ESG_COLORS.environmental.stroke, strokeWidth: 2, r: 3 }}
+                        activeDot={{ r: 5, strokeWidth: 0 }}
+                    />
+                    <Line 
+                        type="monotone" 
+                        dataKey="social_score" 
+                        strokeWidth={2} 
+                        name="Social" 
+                        stroke={ESG_COLORS.social.stroke}
+                        dot={{ stroke: ESG_COLORS.social.stroke, strokeWidth: 2, r: 3 }}
+                        activeDot={{ r: 5, strokeWidth: 0 }}
+                    />
+                    <Line 
+                        type="monotone" 
+                        dataKey="governance_score" 
+                        strokeWidth={2} 
+                        name="Governance" 
+                        stroke={ESG_COLORS.governance.stroke}
+                        dot={{ stroke: ESG_COLORS.governance.stroke, strokeWidth: 2, r: 3 }}
+                        activeDot={{ r: 5, strokeWidth: 0 }}
+                    />
                 </LineChart>
             </ChartContainer>
         </>

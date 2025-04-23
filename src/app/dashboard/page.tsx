@@ -51,8 +51,8 @@ export default function DashboardPage() {
 
     // Fetch ESG score data from API
     // This is for the stat card.
-    const [ticker, setTicker] = useState("DIS");
-    const [inputValue, setInputValue] = useState("DIS");
+    const [ticker, setTicker] = useState("");
+    const [inputValue, setInputValue] = useState("");
 
     // Fetch ESG data based on ticker
     useEffect(() => {
@@ -181,11 +181,12 @@ export default function DashboardPage() {
                     <StatCard 
                       title="Environmental"
                       value={environmentalScore.value}
-                      suffix="%"
+                      suffix=" "
+
                       icon={<BarChart3 className="h-5 w-5" />}
                       chartData={environmentalScore.chartData}
-                      chartColor="#68A691"
-                      gradient="from-teal-400 to-teal-600"
+                      chartColor="#047857"
+                      gradient="from-emerald-600 to-emerald-800"
                     />
                   </div>
 
@@ -194,11 +195,12 @@ export default function DashboardPage() {
                     <StatCard 
                       title="Social"
                       value={socialScore.value}
-                      suffix="%"
+                      suffix=" "
+
                       icon={<TrendingUp className="h-5 w-5" />}
                       chartData={socialScore.chartData}
-                      chartColor="#6E8BB5"
-                      gradient="from-blue-400 to-blue-600"
+                      chartColor="#10b981"
+                      gradient="from-emerald-400 to-emerald-600"
                     />
                   </div>
 
@@ -207,11 +209,11 @@ export default function DashboardPage() {
                     <StatCard 
                       title="Governance"
                       value={governanceScore.value}
-                      suffix="%"
+                      suffix=" "
                       icon={<LineChart className="h-5 w-5" />}
                       chartData={governanceScore.chartData}
-                      chartColor="#A686B7"
-                      gradient="from-purple-400 to-purple-600"
+                      chartColor="#65a30d"
+                      gradient="from-lime-600 to-lime-800"
                     />
                   </div>
                 </div>

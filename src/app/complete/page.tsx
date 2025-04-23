@@ -29,7 +29,7 @@ const tickersMap: Record<string, string[]> = {
   // News companies
   '3_2': ['INTC', 'GOOGL'],
   // Tech companies
-  '3_1': ['ADBE', 'MSFT'],
+  '3_1': ['ADBE', 'AVGO'],
   // Finance
   '3_3': ['GS', 'V'],
   // Food

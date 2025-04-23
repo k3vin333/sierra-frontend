@@ -133,13 +133,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const data = await response.json();
       
       if (response.ok) {
-        return data;
+        // Format the response with a success property
+        return { 
+          success: true, 
+          message: data.message || "Ticker saved successfully",
+          ...data 
+        };
       } else {
-        throw new Error(data.message || 'Failed to save ticker');
+        return { 
+          success: false, 
+          message: data.message || 'Failed to save ticker', 
+          ...data
+        };
       }
     } catch (error) {
       console.error('Save ticker error:', error);
-      throw error;
+      return { 
+        success: false, 
+        message: error instanceof Error ? error.message : 'Unknown error'
+      };
     }
   };
 

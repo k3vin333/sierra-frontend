@@ -3,6 +3,7 @@
 import { useAuth } from '@/context/useAuth';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import DashboardSidebar from '@/app/dashboard/components/DashboardSidebar';
 
 export default function ProtectedRoute({ 
   children,
@@ -15,6 +16,7 @@ export default function ProtectedRoute({
   const router = useRouter();
   const pathname = usePathname();
   const [isDataLoaded, setIsDataLoaded] = useState(!delayRender);
+  const isDashboardPath = pathname?.startsWith('/dashboard') || pathname?.startsWith('/favorites') || pathname?.startsWith('/portfolio');
 
   useEffect(() => {
     // Allow access to landing page (/) and login/register pages without authentication
@@ -30,17 +32,28 @@ export default function ProtectedRoute({
     if (delayRender && !isDataLoaded) {
       const timer = setTimeout(() => {
         setIsDataLoaded(true);
-      }, 500);
+      }, 1000);
       return () => clearTimeout(timer);
     }
   }, [isAuthenticated, isLoading, router, pathname, delayRender, isDataLoaded]);
 
   if (isLoading || (delayRender && !isDataLoaded)) {
+    // For dashboard paths, show sidebar with beige/white background
+    if (isDashboardPath) {
+      return (
+        <div className="min-h-screen flex">
+          <div className="flex-shrink-0">
+            <DashboardSidebar />
+          </div>
+          <div className="flex-1 bg-[#F7EFE6]"></div>
+        </div>
+      );
+    }
+    
+    // For non-dashboard paths, show a simple loading screen
     return (
-      // This is a loading spinner that is displayed while the user is being authenticated
-      // This is to prevent the user from seeing a blank page while the user is being authenticated
-      <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#042B0B]"></div>
+      <div className="flex h-screen items-center justify-center bg-[#F7EFE6]">
+        <div className="text-[#042B0B] text-lg">Loading...</div>
       </div>
     );
   }

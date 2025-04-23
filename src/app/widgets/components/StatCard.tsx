@@ -39,6 +39,7 @@ type StatCardProps = {
   chartData: ChartDataPoint[];
   chartColor: string;
   gradient: string;
+  isLoading?: boolean;
   menuItems?: {
     label: string;
     onClick: () => void;
@@ -66,6 +67,7 @@ export default function StatCard({
   chartData,
   chartColor,
   gradient,
+  isLoading = false,
   menuItems,
 }: StatCardProps) {
 //   const isPositive = change >= 0;
@@ -107,7 +109,7 @@ export default function StatCard({
   return (
     <motion.div
       className="relative w-full h-[200px] [perspective:1200px]"
-      onMouseEnter={() => setIsFlipped(true)}
+      onMouseEnter={() => !isLoading && setIsFlipped(true)}
       onMouseLeave={() => !isDropdownOpen && setIsFlipped(false)}
     >
       {/* FRONT */}
@@ -129,11 +131,18 @@ export default function StatCard({
               </div>
             </div>
             <div className="flex-grow flex items-center justify-start">
-              <span className="text-4xl font-bold text-white">
-                {prefix}
-                {animatedValue.toFixed(suffix ? 1 : 0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                {suffix}
-              </span>
+              {isLoading ? (
+                <div className="text-white text-opacity-80 flex items-center">
+                  <div className="animate-spin mr-2 h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
+                  <span>Loading...</span>
+                </div>
+              ) : (
+                <span className="text-4xl font-bold text-white">
+                  {prefix}
+                  {animatedValue.toFixed(suffix ? 1 : 0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  {suffix}
+                </span>
+              )}
             </div>
             <div className="flex items-center justify-between mt-4">
             </div>
@@ -173,56 +182,63 @@ export default function StatCard({
                 </div>
               )}
             </div>
-            <ChartContainer
-              config={{
-                value: {
-                  color: chartColor,
-                  label: title,
-                },
-              }}
-              className="aspect-auto h-[calc(100%-2rem)] w-full [&_.recharts-cartesian-axis-tick_text]:!fill-white"
-            >
-              <BarChart
-                accessibilityLayer
-                data={chartData}
-                margin={{ top: 5, right: 5, bottom: 5, left: 0 }}
+            {isLoading ? (
+              <div className="flex items-center justify-center flex-grow text-white">
+                <div className="animate-spin mr-2 h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
+                <span>Loading chart data...</span>
+              </div>
+            ) : (
+              <ChartContainer
+                config={{
+                  value: {
+                    color: chartColor,
+                    label: title,
+                  },
+                }}
+                className="aspect-auto h-[calc(100%-2rem)] w-full [&_.recharts-cartesian-axis-tick_text]:!fill-white"
               >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke={lightenHexColor(chartColor, 20)}
-                  vertical={false}
-                />
-                <XAxis
-                  dataKey="date"
-                  stroke="rgba(255,255,255,0.5)"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  minTickGap={32}
-                  tickFormatter={dateFormatter}
-                />
-                <YAxis
-                  stroke="rgba(255,255,255,0.5)"
-                  tickFormatter={valueFormatter}
-                />
-                <ChartTooltip
-                  content={
-                    <ChartTooltipContent
-                      indicator="dashed"
-                      labelFormatter={dateFormatter}
-                    />
-                  }
-                />
-                <Bar
-                  type="monotone"
-                  dataKey="value"
-                  stroke={lightenHexColor(chartColor, 50)}
-                  strokeWidth={0.5}
-                  fill={chartColor}
-                  name={title}
-                />
-              </BarChart>
-            </ChartContainer>
+                <BarChart
+                  accessibilityLayer
+                  data={chartData}
+                  margin={{ top: 5, right: 5, bottom: 5, left: 0 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke={lightenHexColor(chartColor, 20)}
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="date"
+                    stroke="rgba(255,255,255,0.5)"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    minTickGap={32}
+                    tickFormatter={dateFormatter}
+                  />
+                  <YAxis
+                    stroke="rgba(255,255,255,0.5)"
+                    tickFormatter={valueFormatter}
+                  />
+                  <ChartTooltip
+                    content={
+                      <ChartTooltipContent
+                        indicator="dashed"
+                        labelFormatter={dateFormatter}
+                      />
+                    }
+                  />
+                  <Bar
+                    type="monotone"
+                    dataKey="value"
+                    stroke={lightenHexColor(chartColor, 50)}
+                    strokeWidth={0.5}
+                    fill={chartColor}
+                    name={title}
+                  />
+                </BarChart>
+              </ChartContainer>
+            )}
           </CardContent>
         </Card>
       </motion.div>

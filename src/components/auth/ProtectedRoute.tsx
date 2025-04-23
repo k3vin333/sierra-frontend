@@ -2,16 +2,19 @@
 
 import { useAuth } from '@/context/useAuth';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function ProtectedRoute({ 
-  children 
+  children,
+  delayRender = false
 }: { 
-  children: React.ReactNode 
+  children: React.ReactNode,
+  delayRender?: boolean
 }) {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [isDataLoaded, setIsDataLoaded] = useState(!delayRender);
 
   useEffect(() => {
     // Allow access to landing page (/) and login/register pages without authentication
@@ -22,9 +25,17 @@ export default function ProtectedRoute({
         pathname !== '/' && pathname !== '/login' && pathname !== '/register') {
       router.push('/login');
     }
-  }, [isAuthenticated, isLoading, router, pathname]);
 
-  if (isLoading) {
+    // If delayRender is true, wait a bit to ensure data is fully loaded
+    if (delayRender && !isDataLoaded) {
+      const timer = setTimeout(() => {
+        setIsDataLoaded(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isAuthenticated, isLoading, router, pathname, delayRender, isDataLoaded]);
+
+  if (isLoading || (delayRender && !isDataLoaded)) {
     return (
       // This is a loading spinner that is displayed while the user is being authenticated
       // This is to prevent the user from seeing a blank page while the user is being authenticated

@@ -1,12 +1,18 @@
+// src/app/api/company-search/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Record<string, string> }
-) {
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const query = searchParams.get('query');
+
+  if (!query) {
+    return NextResponse.json({ error: 'Query parameter required' }, { status: 400 });
+  }
+
   try {
-    const query = params.query;
-    const res = await fetch(`https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/search/company/${query}`);
+    const res = await fetch(
+      `https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/search/company/${query}`
+    );
     const data = await res.json();
 
     return NextResponse.json(data, {
@@ -14,8 +20,8 @@ export async function GET(
         'Cache-Control': 'no-store',
       },
     });
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
+    console.error('Error fetching company search results:', error);
     return NextResponse.json({ error: 'Failed to fetch companies' }, { status: 500 });
   }
 }

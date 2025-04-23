@@ -42,10 +42,17 @@ export default function ProtectedRoute({
     if (isDashboardPath) {
       return (
         <div className="min-h-screen flex">
-          <div className="flex-shrink-0">
-            <DashboardSidebar />
+          <div className="flex flex-row w-full">
+            {/* Sidebar */}
+            <div className="flex-shrink-0">
+              <DashboardSidebar />
+            </div>
+            
+            {/* Main Content Area - Exact same structure as in dashboard */}
+            <div className="flex-1 bg-[#F7EFE6] px-4 py-4">
+              {/* Empty content while loading */}
+            </div>
           </div>
-          <div className="flex-1 bg-[#F7EFE6]"></div>
         </div>
       );
     }

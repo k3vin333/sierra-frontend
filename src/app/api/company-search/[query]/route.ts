@@ -8,15 +8,16 @@ type RouteParams = {
   };
 };
 
-// Use environment variable for API key
+// Use environment variable for API key - ensure it's consistent with the frontend approach
 const getFinnhubApiKey = () => {
+  // Server components should use process.env directly (not NEXT_PUBLIC)
   if (process.env.FINNHUB_API_KEY) {
     return process.env.FINNHUB_API_KEY;
   }
   
-  // For local development, you might want to use a placeholder or throw an error
+  // For development - warning message but use a placeholder
   console.warn('FINNHUB_API_KEY environment variable is not set');
-  return 'placeholder_api_key_for_development';
+  return '';
 };
 
 export async function GET(
@@ -25,6 +26,14 @@ export async function GET(
 ) {
   const query = context.params.query;
   const apiKey = getFinnhubApiKey();
+  
+  // If no API key is available, return an error
+  if (!apiKey) {
+    return NextResponse.json(
+      { error: 'API key is not configured' },
+      { status: 500 }
+    );
+  }
   
   try {
     // Use the actual Finnhub API for symbol lookup

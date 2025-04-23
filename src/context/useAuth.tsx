@@ -14,11 +14,6 @@ interface TickerData {
   created_at: string;
 }
 
-interface TickerData {
-  ticker: string;
-  created_at: string;
-}
-
 interface AuthContextType {
   // Define the context type for the user object the same as the backend
   user: User | null;
@@ -29,7 +24,6 @@ interface AuthContextType {
   register: (email: string, password: string, name: string) => Promise<boolean>;
   logout: () => void;
   saveTicker: (ticker: string) => Promise<{ success: boolean; message?: string }>;
-  getTickers: () => Promise<TickerData[]>;
   getTickers: () => Promise<TickerData[]>;
 }
 
@@ -119,7 +113,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     // No automatic redirect here
-    // No automatic redirect here
   };
   
   const saveTicker = async (ticker: string) => {
@@ -130,11 +123,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       // Try using query parameter token instead of headers
       const response = await fetch(`https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/auth/tickers?token=${token}`, {
-      // Try using query parameter token instead of headers
-      const response = await fetch(`https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/auth/tickers?token=${token}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ ticker })
@@ -235,8 +225,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       login, 
       register, 
       logout,
-      saveTicker,
-      getTickers
       saveTicker,
       getTickers
     }}>

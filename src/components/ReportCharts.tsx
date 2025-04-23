@@ -1,3 +1,4 @@
+// src/components/ReportCharts.tsx
 'use client';
 
 import { useState } from "react";
@@ -15,17 +16,26 @@ export default function ReportCharts({ companyId }: { companyId: string }) {
         <Box sx={{ p: 4 }}>
             <ESGPrediction companyId={companyId} />
             <Typography variant="h4" gutterBottom>
-                ESG Report for {companyId}
+                ESG Report for {companyId.toUpperCase()}
             </Typography>
 
-            <Tabs value={tabIndex} onChange={(_, newValue) => setTabIndex(newValue)} sx={{ mb: 3 }}>
+            <Tabs
+                value={tabIndex}
+                onChange={(_, newValue) => setTabIndex(newValue)}
+                sx={{ mb: 3 }}
+            >
                 <Tab label="Total ESG Risk Trend" />
                 <Tab label="ESG Factors" />
                 <Tab label="ESG Level" />
                 <Tab label="Finance Impact" />
             </Tabs>
 
-            <Paper elevation={3} sx={{ p: 2 }}>
+            <Paper
+                elevation={1}
+                sx={{ p: 2, backgroundColor: '#f6eee2', borderRadius: 2,
+                    border: '1px solid #E1DED6',
+                }}
+            >
                 {tabIndex === 0 && <ESGTrendChart companyId={companyId} />}
                 {tabIndex === 1 && <ESGFactorsChart companyId={companyId} />}
                 {tabIndex === 2 && <ESGLevelChart companyId={companyId} />}

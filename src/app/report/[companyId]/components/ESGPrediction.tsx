@@ -44,16 +44,22 @@ export default function ESGPrediction({ companyId }: Props) {
                     const [lag_1, lag_2, lag_3] = lastThree.map((entry) => entry.total_score);
                     setCurrentScore(lag_1);
 
+                    console.log("Calling prediction with:", lag_1, lag_2, lag_3);
+
+                    // cors error
                     /*const predictionRes = await fetch(
                         `https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/predict?lag_1=${lag_1}&lag_2=${lag_2}&lag_3=${lag_3}`
-                    );
+                    );*/
+
+                    const predictionRes = await fetch(`/api/predict?lag_1=${lag_1}&lag_2=${lag_2}&lag_3=${lag_3}`);
     
                     const predictionJson = await predictionRes.json();
-                    setPrediction(predictionJson?.predicted_score ?? null);
-                    */
+                    setPrediction(Number(predictionJson?.prediction ?? null));
+
+                    
                     // mocking
-                    const mockedPrediction = lag_3 + Math.round((Math.random() - 0.5) * 6); // +/- up to 3
-                    setPrediction(mockedPrediction);
+                    /*const mockedPrediction = lag_3 + Math.round((Math.random() - 0.5) * 6); // +/- up to 3
+                    setPrediction(mockedPrediction);*/
                 }
             } catch (err) {
                 console.error("Failed to fetch prediction", err);

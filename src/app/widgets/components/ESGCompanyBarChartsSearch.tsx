@@ -59,6 +59,7 @@ export default function ESGCompanyBarCharts() {
       const res = await fetch(`/api/company-search/${query}`);
       console.log('Response status:', res.status);
       const json = await res.json();
+<<<<<<< HEAD
       console.log('API response:', json);
       
       if (!json || !json.companies) {
@@ -71,6 +72,14 @@ export default function ESGCompanyBarCharts() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const tickers = [...new Set(json.companies.map((c: any) => c.ticker.toLowerCase()))];
       console.log('Extracted tickers:', tickers);
+=======
+      
+      const tickers = Array.isArray(json.companies)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ? [...new Set(json.companies.map((c: any) => c.ticker?.toLowerCase()))]
+        : [];
+
+>>>>>>> decdc2b3387840986ae97fa4641c85a0ec0856b8
 
       const grouped: Record<string, ChartDataPoint[]> = {};
 

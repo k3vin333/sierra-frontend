@@ -21,7 +21,6 @@ const getFinnhubApiKey = () => {
   if (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_FINNHUB_API_KEY) {
     return process.env.NEXT_PUBLIC_FINNHUB_API_KEY;
   }
-  
   // Fallback for development or if env variable is not set
   return 'placeholder_api_key_for_development';
 };
@@ -349,4 +348,3 @@ export default function DashboardPage() {
       </ProtectedRoute>
     );
   }
-  

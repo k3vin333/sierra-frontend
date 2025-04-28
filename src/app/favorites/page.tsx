@@ -99,7 +99,7 @@ export default function FavoritesPage() {
   };
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute delayRender={true}>
       <div className="min-h-screen flex bg-[#F7EFE6]">
         <div className="w-64">
           <DashboardSidebar />

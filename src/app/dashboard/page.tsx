@@ -6,11 +6,24 @@ import DashboardSidebar from './components/DashboardSidebar';
 import CompanyRatingWidget from '../widgets/components/LevelACompaniesWidget';
 import ESGCompanyBarChartsSearch from '../widgets/components/ESGCompanyBarChartsSearch';
 import CompanyESGChart from '../widgets/components/CompanyESGChart';
-import { ChevronUp, BarChart3, TrendingUp, LineChart } from 'lucide-react';
+import { ChevronUp, BarChart3, TrendingUp, LineChart, Briefcase } from 'lucide-react';
 import AllCompaniesESGChart from '../widgets/components/AllCompaniesESGChart';
 import StatCard from '../widgets/components/StatCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useAuth } from '@/context/useAuth';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import Link from 'next/link';
+
+// Use environment variable if available, otherwise use a placeholder
+const getFinnhubApiKey = () => {
+  // For client-side code, use NEXT_PUBLIC_ prefix for environment variables
+  if (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_FINNHUB_API_KEY) {
+    return process.env.NEXT_PUBLIC_FINNHUB_API_KEY;
+  }
+  // Fallback for development or if env variable is not set
+  return 'placeholder_api_key_for_development';
+};
 
 // Define types
 type ChartDataPoint = {
@@ -24,9 +37,96 @@ type ESGScoreData = {
   chartData: ChartDataPoint[];
 };
 
+// Portfolio Card Component
+function PortfolioCard({ onTickerSelect }: { onTickerSelect: (ticker: string) => void }) {
+  const [portfolioItems, setPortfolioItems] = useState<Array<{ticker: string, name?: string}>>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { getTickers } = useAuth();
+
+  // Fetch stock details from API
+  const fetchStockDetails = async (ticker: string) => {
+    try {
+      const apiKey = getFinnhubApiKey();
+      const res = await fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${apiKey}`);
+      const companyData = await res.json();
+      
+      return {
+        ticker,
+        name: companyData.name || ticker
+      };
+    } catch (error) {
+      console.error("Error fetching stock details:", error);
+      return { ticker, name: ticker };
+    }
+  };
+
+  useEffect(() => {
+    const loadTickers = async () => {
+      setIsLoading(true);
+      try {
+        // Get tickers from the API
+        const tickerData = await getTickers();
+        
+        // Map the tickers to portfolio items with company names
+        const portfolioPromises = tickerData.map(async (tickerItem) => {
+          return await fetchStockDetails(tickerItem.ticker);
+        });
+        
+        const resolvedPortfolioItems = await Promise.all(portfolioPromises);
+        setPortfolioItems(resolvedPortfolioItems);
+      } catch (error) {
+        console.error("Failed to load tickers:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadTickers();
+  }, [getTickers]);
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+        <CardTitle className="text-sm font-medium">Your Portfolio</CardTitle>
+        <Briefcase className="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="py-4 text-center text-sm text-muted-foreground">
+            Loading your portfolio...
+          </div>
+        ) : portfolioItems.length === 0 ? (
+          <div className="py-4 text-center text-sm text-muted-foreground">
+            No tickers in your portfolio yet.
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {portfolioItems.map((item) => (
+              <div 
+                key={item.ticker} 
+                className="flex justify-between items-center py-1 px-2 hover:bg-gray-100 rounded cursor-pointer transition-colors"
+                onClick={() => onTickerSelect(item.ticker)}
+              >
+                <div className="font-medium">{item.ticker}</div>
+                <div className="text-sm text-muted-foreground truncate max-w-[150px]">{item.name}</div>
+              </div>
+            ))}
+            <Link href="/dashboard/reports" className="block w-full">
+              <Button variant="outline" size="sm" className="w-full mt-2">
+                Manage Portfolio
+              </Button>
+            </Link>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function DashboardPage() {
     const [isCompaniesWidgetExpanded, setIsCompaniesWidgetExpanded] = useState(true);
     const contentRef = useRef<HTMLDivElement>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     // State for ESG score data
     const [environmentalScore, setEnvironmentalScore] = useState<ESGScoreData>({ 
@@ -54,15 +154,27 @@ export default function DashboardPage() {
     const [ticker, setTicker] = useState("");
     const [inputValue, setInputValue] = useState("");
 
+    // Handle ticker selection from portfolio
+    const handleTickerSelect = (selectedTicker: string) => {
+      setInputValue(selectedTicker);
+      setTicker(selectedTicker);
+    };
+
     // Fetch ESG data based on ticker
     useEffect(() => {
       const fetchESGData = async () => {
+        if (!ticker) return;
+        
+        setIsLoading(true);
         try {
           const res = await fetch(`/api/esg?ticker=${ticker}`);
           const data = await res.json();
 
           const historical = data?.historical_ratings;
-          if (!historical || !historical.length) return;
+          if (!historical || !historical.length) {
+            setIsLoading(false);
+            return;
+          }
 
           const transform = (key: "environmental_score" | "social_score" | "governance_score") => {
             return historical.map((entry: Record<string, number | string>) => ({
@@ -99,6 +211,8 @@ export default function DashboardPage() {
           });
         } catch (err) {
           console.error("Failed to fetch ESG data:", err);
+        } finally {
+          setIsLoading(false);
         }
       };
 
@@ -106,7 +220,7 @@ export default function DashboardPage() {
     }, [ticker]);
 
     return (
-      <ProtectedRoute>
+      <ProtectedRoute delayRender={true}>
         <div className="min-h-screen flex">
           <div className="flex flex-row w-full">
             {/* Sidebar */}
@@ -121,7 +235,7 @@ export default function DashboardPage() {
                 <div className="lg:w-3/4">
                   {/* ESG Chart */}
                   <div className="mb-6 bg-white rounded-lg shadow-sm">
-                    <CompanyESGChart />
+                    <CompanyESGChart selectedTicker={ticker} />
                   </div>
       
                   {/* ESG Rated A Companies */}
@@ -171,9 +285,18 @@ export default function DashboardPage() {
                       onKeyDown={(e) => e.key === 'Enter' && setTicker(inputValue.trim().toUpperCase())}
                       className="w-full"
                     />
-                    <Button onClick={() => setTicker(inputValue.trim().toUpperCase())} variant="outline">
-                      Search
+                    <Button 
+                      onClick={() => setTicker(inputValue.trim().toUpperCase())} 
+                      variant="outline"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? 'Loading...' : 'Search'}
                     </Button>
+                  </div>
+                  
+                  {/* Portfolio Card */}
+                  <div className="h-auto">
+                    <PortfolioCard onTickerSelect={handleTickerSelect} />
                   </div>
                   
                   {/* Environmental Score Card */}
@@ -182,11 +305,11 @@ export default function DashboardPage() {
                       title="Environmental"
                       value={environmentalScore.value}
                       suffix=" "
-
                       icon={<BarChart3 className="h-5 w-5" />}
                       chartData={environmentalScore.chartData}
                       chartColor="#047857"
                       gradient="from-emerald-600 to-emerald-800"
+                      isLoading={isLoading}
                     />
                   </div>
 
@@ -196,11 +319,11 @@ export default function DashboardPage() {
                       title="Social"
                       value={socialScore.value}
                       suffix=" "
-
                       icon={<TrendingUp className="h-5 w-5" />}
                       chartData={socialScore.chartData}
                       chartColor="#10b981"
                       gradient="from-emerald-400 to-emerald-600"
+                      isLoading={isLoading}
                     />
                   </div>
 
@@ -214,6 +337,7 @@ export default function DashboardPage() {
                       chartData={governanceScore.chartData}
                       chartColor="#65a30d"
                       gradient="from-lime-600 to-lime-800"
+                      isLoading={isLoading}
                     />
                   </div>
                 </div>

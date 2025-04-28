@@ -113,7 +113,7 @@ export default function PortfolioPage() {
     };
 
     return (
-        <ProtectedRoute>
+        <ProtectedRoute delayRender={true}>
             <div className="min-h-screen flex bg-[#F7EFE6]">
                 <div className="w-64">
                     <DashboardSidebar />
@@ -128,7 +128,8 @@ export default function PortfolioPage() {
                                     ? "Loading your portfolio..."
                                     : tickers.length === 0 
                                         ? "Loading your portfolio..." 
-                                        : `Loading data for ${Object.entries(tickersLoaded).filter(([_, isLoaded]) => isLoaded).length} of ${tickers.length} companies...`
+                                        : `Loading data for ${Object.entries(tickersLoaded).filter(([, isLoaded]) => isLoaded).length} of ${tickers.length} companies...`
+
                                 }
                             </p>
                         </div>

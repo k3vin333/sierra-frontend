@@ -1,7 +1,6 @@
 // app/api/level-a/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function GET(request: NextRequest) {
   try {
     const res = await fetch('https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/search/level/total_level/A');

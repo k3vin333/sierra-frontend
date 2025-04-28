@@ -1,23 +1,32 @@
 // src/app/api/company-search/[query]/route.ts
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
+
+type Params = { query: string };
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { query: string } }
+  { params }: { params: Promise<Params> }   // ← NEW: params is a Promise
 ) {
-  const query = params.query;
-  
+  const { query } = await params;           // ← NEW: await the promise
+
   try {
-    // Your existing implementation here
-    const response = await fetch(`YOUR_API_ENDPOINT/${query}`);
-    const data = await response.json();
-    
+    const res = await fetch(
+      `https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/search/company/${encodeURIComponent(
+        query,
+      )}`,
+    );
+
+    if (!res.ok) {
+      throw new Error(`ESG API responded with status: ${res.status}`);
+    }
+
+    const data = await res.json();
     return NextResponse.json(data);
-  } catch (error) {
-    console.error('Search error:', error);
+  } catch (err) {
+    console.error('Company search error:', err);
     return NextResponse.json(
-      { error: 'Failed to fetch search results' },
-      { status: 500 }
+      { error: 'Failed to fetch company search results' },
+      { status: 500 },
     );
   }
 }

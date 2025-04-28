@@ -68,7 +68,6 @@ export default function ESGCompanyBarCharts() {
         return;
       }
       
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const tickers = [...new Set(json.companies.map((c: any) => c.ticker.toLowerCase()))];
       console.log('Extracted tickers:', tickers);
 
@@ -82,8 +81,6 @@ export default function ESGCompanyBarCharts() {
 
         if (data?.historical_ratings?.length) {
           const key = `${data.historical_ratings[0].company_name}::${data.ticker.toUpperCase()}`;
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const chartData: ChartDataPoint[] = data.historical_ratings.map((entry: any) => ({
             date: new Date(entry.timestamp).toLocaleDateString('en-AU', {
               year: '2-digit',

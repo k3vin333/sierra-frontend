@@ -110,7 +110,7 @@ export default function ESGLevelChart({ companyId }: Props) {
                         domain={[1, 5]}
                         ticks={[1, 2, 3, 4, 5]}
                         tickFormatter={(value) => {
-                            const label = Object.entries(ratingScale).find(([k, v]) => v === value);
+                            const label = Object.entries(ratingScale).find(([, v]) => v === value);
                             return label ? label[0] : value;
                         }}
                     />

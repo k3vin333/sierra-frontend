@@ -11,8 +11,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/useAuth';
 
-const API_KEY = 'cvt6ephr01qhup0ui9v0cvt6ephr01qhup0ui9vg';
-
 // Define a type for portfolio items
 type PortfolioItem = {
   id: string;
@@ -56,18 +54,14 @@ const DataTable = ({ portfolioItems }: { portfolioItems: PortfolioItem[] }) => {
 // Move OcrReader outside the ReportsPage component
 const OcrReader = ({ onAddTicker }: { onAddTicker: (ticker: string) => void }) => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [ocrResult, setOcrResult] = useState<string>('');
   const [ocrStatus, setOcrStatus] = useState<string>('');
-  const [extractedTickers, setExtractedTickers] = useState<string[]>([]);
   const [validatedTickers, setValidatedTickers] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       setSelectedImage(event.target.files[0]);
-      setOcrResult(''); // Reset OCR result
-      setOcrStatus(''); // Reset status
-      setExtractedTickers([]);
+      setOcrStatus('');
       setValidatedTickers([]);
     }
   };
@@ -88,7 +82,6 @@ const OcrReader = ({ onAddTicker }: { onAddTicker: (ticker: string) => void }) =
       // Scan the entire line for potential tickers
       const words = line.trim().split(/\s+/).filter(word => word.length > 0);
       if (words.length > 0) {
-        // Remove trailing single dot or triple dots from the first word to clean up potential ticker symbols
         // Check if it matches ticker format
         if (tickerRegex.test(words[0])) {
           tickers.push(words[0]);
@@ -96,18 +89,8 @@ const OcrReader = ({ onAddTicker }: { onAddTicker: (ticker: string) => void }) =
       }
     }
 
-    // Now for final check, we use FINNHUB api to see if a ticker returns
-    // a valid body which isnt an error, and push to tickersAreValid
-    const tickersAreValid: string[] = [];
-    for (const ticker of tickers) {
-      const res = await fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${API_KEY}`);
-      const data = await res.json();
-      // Check if response is not an error and has valid data
-      if (data && !data.error && Object.keys(data).length > 0) {
-        tickersAreValid.push(ticker);
-      }
-    }
-    setValidatedTickers(tickersAreValid);
+    // Set all extracted tickers as validated
+    setValidatedTickers(tickers);
     
     return tickers;
   };
@@ -125,12 +108,12 @@ const OcrReader = ({ onAddTicker }: { onAddTicker: (ticker: string) => void }) =
       const {
         data: { text },
       } = await worker.recognize(selectedImage);
-
-      setOcrResult(text);
-      
       // Extract tickers from the OCR result
-      const tickers = extractTickers(text);
-      setExtractedTickers(await tickers);
+      // Note: extractTickers returns all potential tickers and also updates validatedTickers state
+      // with those that pass the Finnhub API validation
+      const extractedTickers = await extractTickers(text);
+      console.log('All extracted tickers:', extractedTickers);
+      // The UI will automatically update with validated tickers via state
       
       setOcrStatus('Completed');
     } catch (error) {
@@ -194,21 +177,70 @@ export default function ReportsPage() {
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
   const { getTickers, saveTicker } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+
+  // Function to load all tickers
+  const loadTickers = async () => {
+    setIsLoading(true);
+    try {
+      // Get tickers from the API
+      const tickerData = await getTickers();
+      
+      // Map the tickers to portfolio items with company names
+      const portfolioPromises = tickerData.map(async (tickerItem) => {
+        const details = await fetchStockDetails(tickerItem.ticker);
+        if (details) {
+          return {
+            ...details,
+            // Convert the timestamp string to a Date
+            addedAt: new Date(tickerItem.created_at)
+          };
+        }
+        return null;
+      });
+      
+      const resolvedPortfolioItems = await Promise.all(portfolioPromises);
+      // Filter out null items and set to state
+      setPortfolioItems(resolvedPortfolioItems.filter(item => item !== null) as PortfolioItem[]);
+    } catch (error) {
+      console.error("Failed to load tickers:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
 
   // Fetch stock details from API
   const fetchStockDetails = async (ticker: string): Promise<PortfolioItem | null> => {
     try {
-      const res = await fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${API_KEY}`);
-      const companyData = await res.json();
+      // Use our ESG API to get company details instead of Finnhub
+      const res = await fetch(`https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/esg/${ticker}`);
+      const data = await res.json();
       
-      if (!companyData.name) {
+      // Check if we have valid data with company_name
+      if (!data || !data.company_name) {
+        // Try the search endpoint as fallback
+        const searchRes = await fetch(`https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/search/company/${ticker}`);
+        const searchData = await searchRes.json();
+        
+        if (searchData.companies && searchData.companies.length > 0) {
+          const company = searchData.companies[0];
+          return {
+            id: crypto.randomUUID(),
+            ticker: ticker,
+            name: company.company_name,
+            addedAt: new Date()
+          };
+        }
+        
         return null;
       }
       
       return {
         id: crypto.randomUUID(),
         ticker: ticker,
-        name: companyData.name,
+        name: data.company_name,
         addedAt: new Date()
       };
     } catch (error) {
@@ -217,43 +249,29 @@ export default function ReportsPage() {
     }
   };
 
-  // Load tickers from API
+  // Load tickers from API on component mount or when refreshTrigger changes
   useEffect(() => {
-    const loadTickers = async () => {
-      setIsLoading(true);
-      try {
-        // Get tickers from the API
-        const tickerData = await getTickers();
-        
-        // Map the tickers to portfolio items with company names
-        const portfolioPromises = tickerData.map(async (tickerItem) => {
-          const details = await fetchStockDetails(tickerItem.ticker);
-          if (details) {
-            return {
-              ...details,
-              // Convert the timestamp string to a Date
-              addedAt: new Date(tickerItem.created_at)
-            };
-          }
-          return null;
-        });
-        
-        const resolvedPortfolioItems = await Promise.all(portfolioPromises);
-        // Filter out null items and set to state
-        setPortfolioItems(resolvedPortfolioItems.filter(item => item !== null) as PortfolioItem[]);
-      } catch (error) {
-        console.error("Failed to load tickers:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
     loadTickers();
-  }, [getTickers]);
+  }, [getTickers, refreshTrigger]);
+
+  // Auto-hide notification after 3 seconds
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
 
   const handleAddTicker = async (ticker: string) => {
     // Check if ticker already exists in portfolio
     if (portfolioItems.some(item => item.ticker === ticker)) {
+      setNotification({
+        message: `${ticker} is already in your portfolio`,
+        type: 'error'
+      });
+
       return;
     }
 
@@ -265,24 +283,52 @@ export default function ReportsPage() {
         const result = await saveTicker(ticker);
         
         if (result.success) {
-          // Add ticker to local state for immediate UI update
-          const updatedPortfolio = [...portfolioItems, stockDetails];
-          setPortfolioItems(updatedPortfolio);
+          // Show success notification
+          setNotification({
+            message: `Added ${ticker} to your portfolio`,
+            type: 'success'
+          });
+          
+          // Refresh the entire portfolio list
+          setRefreshTrigger(prev => prev + 1);
         } else {
-          console.error("Failed to save ticker:", result.message);
+          // Only show error notification if it's actually an error
+          setNotification({
+            message: `Failed to add ${ticker}: ${result.message}`,
+            type: 'error'
+          });
         }
       } catch (error) {
-        console.error("Error saving ticker:", error);
+        setNotification({
+          message: `Error adding ${ticker}`,
+          type: 'error'
+        });
+        
+        // Use type assertion to access properties of the error object
+        const err = error as any;
+        console.error("Error saving ticker:", err?.message || "Unknown error");
       }
+    } else {
+      setNotification({
+        message: `Could not find data for ${ticker}`,
+        type: 'error'
+      });
     }
   };
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute delayRender={true}>
       <div className="min-h-screen flex bg-[#F7EFE6]">
         <DashboardSidebar />
         <div className="flex-1 p-8">
           <h1 className="text-2xl font-bold text-[#042B0B] mb-6">Import your portfolio</h1>
+          {/* Notification toast */}
+          {notification && (
+            <div className={`mb-4 p-3 rounded-md ${notification.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+              {notification.message}
+            </div>
+          )}
+          
           <div className="flex w-full h-full">
             <div className="bg-white p-6 rounded-lg shadow-md w-1/2 h-1/2 mr-3">
               <OcrReader onAddTicker={handleAddTicker} />
